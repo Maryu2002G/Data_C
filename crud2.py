@@ -130,54 +130,47 @@ def mostrar_datos_tabla(conexion, nombre_tabla):
         print(f"Error al obtener los datos de la tabla {nombre_tabla}: {err}")
     finally:
         cursor.close()  # Cierra el cursor
-
-def actualizar_datos_tabla(conexion, id_empleado, columna, nuevo_valor):
+def actualizar_datos_salaries(conexion, emp_no, from_date, to_date, columna, nuevo_valor):
     """
-    Actualiza un campo específico (`columna`) de un registro en la tabla `empleados` según el `id_empleado` proporcionado.
-    
+    Actualiza un campo específico (`columna`) de un registro en la tabla `salaries` según `emp_no`, `from_date`, y `to_date`.
+
     Args:
         conexion (MySQLConnection): Objeto de conexión a la base de datos MySQL.
-        id_empleado (int): ID del empleado cuyo registro se actualizará.
-        columna (str): Nombre de la columna que se actualizará (por ejemplo, `salario`, `puesto`).
-        nuevo_valor (str/float): Nuevo valor para la columna especificada. Si la columna es `salario`, debe ser un número.
+        emp_no (int): Número del empleado cuyo registro se actualizará.
+        from_date (str): Fecha de inicio del período del registro a actualizar.
+        to_date (str): Fecha de fin del período del registro a actualizar.
+        columna (str): Nombre de la columna que se actualizará (por ejemplo, `salary`).
+        nuevo_valor (int): Nuevo valor para la columna especificada.
     """
     try:
         cursor = conexion.cursor()
-        
-        # Si la columna es 'salario', convierte el nuevo valor a float
-        if columna == "salario":
-            nuevo_valor = float(nuevo_valor)
-        
-        # Construye la consulta para actualizar el registro
-        query = f"UPDATE empleados SET {columna} = %s WHERE id = %s"
-        cursor.execute(query, (nuevo_valor, id_empleado))
-        
-        conexion.commit()  # Confirma los cambios
-        
+        query = f"UPDATE salaries SET {columna} = %s WHERE emp_no = %s AND from_date = %s AND to_date = %s"
+        cursor.execute(query, (nuevo_valor, emp_no, from_date, to_date))
+        conexion.commit()
         if cursor.rowcount > 0:
             print(f"Datos actualizados exitosamente. Filas afectadas: {cursor.rowcount}")
         else:
             print("No se encontraron registros para actualizar.")
     except Error as err:
-        # Imprime el error si ocurre y deshace los cambios
         print(f"Error al actualizar los datos: {err}")
         conexion.rollback()
     finally:
-        cursor.close()  # Cierra el cursor
+        cursor.close()
+
 
 def eliminar_datos_tabla(conexion, id_empleado):
     """
-    Elimina un registro en la tabla `empleados` basado en el `id_empleado` proporcionado.
+    Elimina un registro en la tabla `salaries` basado en el `id_empleado` proporcionado.
     
     Args:
         conexion (MySQLConnection): Objeto de conexión a la base de datos MySQL.
-        id_empleado (int): ID del empleado cuyo registro se eliminará.
+        emp_no (int): ID del empleado cuyo registro se eliminará.
     """
     try:
         cursor = conexion.cursor()
         
         # Construye la consulta para eliminar el registro
-        query = "DELETE FROM empleados WHERE id = %s"
+        query = "DELETE FROM salaries WHERE emp_no = %s"
         cursor.execute(query, (id_empleado,))
         
         conexion.commit()  # Confirma los cambios
@@ -193,65 +186,80 @@ def eliminar_datos_tabla(conexion, id_empleado):
     finally:
         cursor.close()  # Cierra el cursor
 
-def anadir_datos_tabla(conexion, id_empleado, nombre, puesto, salario):
+
+def anadir_datos_salaries(conexion, emp_no, salary, from_date, to_date):
     """
-    Añade un nuevo registro a la tabla `empleados` con los valores proporcionados para `id_empleado`, `nombre`, `puesto` y `salario`.
-    
+    Añade nuevos datos a la tabla `salaries`.
+
     Args:
         conexion (MySQLConnection): Objeto de conexión a la base de datos MySQL.
-        id_empleado (int): ID del nuevo empleado.
-        nombre (str): Nombre del nuevo empleado.
-        puesto (str): Puesto del nuevo empleado.
-        salario (float): Salario del nuevo empleado.
+        emp_no (int): Número del empleado.
+        salary (float): Salario del empleado.
+        from_date (str): Fecha de inicio del rango (formato 'YYYY-MM-DD').
+        to_date (str): Fecha de fin del rango (formato 'YYYY-MM-DD').
     """
     try:
         cursor = conexion.cursor()
-        
-        # Construye la consulta para insertar un nuevo registro
         query = """
-        INSERT INTO empleados (id, nombre, puesto, salario) 
+        INSERT INTO salaries (emp_no, salary, from_date, to_date) 
         VALUES (%s, %s, %s, %s)
         """
-        cursor.execute(query, (id_empleado, nombre, puesto, salario))
-        
-        conexion.commit()  # Confirma los cambios
-        
-        print(f"Datos añadidos exitosamente. ID del empleado: {id_empleado}")
+        cursor.execute(query, (emp_no, salary, from_date, to_date))
+        conexion.commit()
+        print(f"Datos añadidos exitosamente. Número de empleado: {emp_no}")
     except Error as err:
-        # Imprime el error si ocurre y deshace los cambios
         print(f"Error al añadir los datos: {err}")
         conexion.rollback()
     finally:
-        cursor.close()  # Cierra el cursor
+        cursor.close()
+        
+def vaciar_tabla_salaries(conexion):
+    """
+    Vacía la tabla `salaries` eliminando todos los registros, pero manteniendo la estructura de la tabla.
+
+    Args:
+        conexion (MySQLConnection): Objeto de conexión a la base de datos MySQL.
+    """
+    try:
+        cursor = conexion.cursor()
+        query = "TRUNCATE TABLE salaries"
+        cursor.execute(query)
+        conexion.commit()
+        print("Tabla `salaries` vaciada exitosamente.")
+    except Error as err:
+        print(f"Error al vaciar la tabla: {err}")
+        conexion.rollback()
+    finally:
+        cursor.close()
+
 
 if __name__ == "__main__":
     conexion = conectar()
     if conexion:
         try:
-            mostrar_bases_datos(conexion)  # Muestra todas las bases de datos en el servidor
+            # Vaciar la tabla `salaries`
+            #vaciar_tabla_salaries(conexion)
             mostrar_tablas(conexion)
-            mostrar_estructura_tabla(conexion, "empleados")
-            mostrar_datos_tabla(conexion, "empleados")
-            
+            mostrar_estructura_tabla(conexion, "salaries")
+            mostrar_datos_tabla(conexion, "salaries")
+
             # Ejemplo de actualización
-            id_empleado = 6  # ID del empleado a actualizar
-            columna_empleados = "salario"  # Columna a actualizar
-            nuevo_valor_empleados = 50000  # Nuevo valor para la columna
-            //actualizar_datos_empleados(conexion, id_empleado, columna_empleados, nuevo_valor_empleados)
+            id_empleado = 2  # ID del salaro a actualizar
+            columna = "to_date"  # Columna a actualizar
+            nuevo_valor = "2024-12-31"  # Nuevo valor para la columna
+            actualizar_datos_tabla(conexion, id_empleado, columna, nuevo_valor)
 
             # Ejemplo de eliminación
-            id_empleado_eliminar = 1  # ID del empleado a eliminar
-            eliminar_datos_tabla(conexion, id_empleado_eliminar)
+            emp_no_eliminar = 2  # Número del empleado
+            eliminar_datos_tabla(conexion, emp_no_eliminar)
 
             # Ejemplo de adición
-            id_empleado_nuevo = 2  # Nuevo ID del empleado
-            nombre_nuevo = "Cristian"  # Nombre del nuevo empleado
-            puesto = "Concerje"       # Puesto del nuevo empleado
-            salario_nuevo = 45000     # Salario del nuevo empleado
-            anadir_datos_tabla(conexion, id_empleado_nuevo, nombre_nuevo, puesto, salario_nuevo)
+            emp_no_nuevo = 2  # Número del nuevo empleado
+            salario_nuevo = 56000  # Salario del nuevo empleado
+            anadir_datos_salaries(conexion, emp_no_nuevo, salario_nuevo, '2024-01-01', '2024-12-31')
 
             # Mostrar los datos actualizados
-            mostrar_datos_tabla(conexion, "empleados")
+            mostrar_datos_tabla(conexion, "salaries")
         finally:
             conexion.close()
             print("Conexión cerrada")
