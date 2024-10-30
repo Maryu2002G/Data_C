@@ -1,45 +1,66 @@
 {% extends "nav.html" %}
+
 {% block titulo %} Lista de Materiales {% endblock %}
+
 {% block contenido %}
-<div class="card">
-    <div class="card-header">
-       <a class="btn btn-primary" href="{% url 'create_material' %}" role="button">Agregar nuevo material</a>
-    </div>
-    <div class="card-body">
-        <h4 class="card-title">Materiales</h4>
-        <div class="table-responsive">
-            <table class="table table-primary">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Contenido</th>
-                        <th scope="col">Imagen</th>
-                        <th scope="col">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for material in materials %}
-                    <tr>
-                        <td scope="row">{{ material.id }}</td>
-                        <td>{{ material.get_type_display }}</td>
-                        <td>{{ material.content }}</td>
-                        <td>
-                            <img src="{{ material.image.url }}" alt="Imagen de {{ material.content }}" style="max-width: 100px; max-height: 100px;">
-                        </td>
-                        <td> 
-                            <a class="btn btn-info" href="{% url 'update_material' material.id %}" role="button">Actualizar</a>
-                            |  
-                            <a class="btn btn-danger" href="{% url 'delete_material' material.id %}" role="button">Eliminar</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Materiales</h4>
+            <a class="btn btn-primary" href="{% url 'create_material' %}" role="button">Agregar nuevo material</a>
+        </div>
+        <div class="card-body">
+            <!-- Campo de búsqueda responsivo -->
+            <div class="mb-3">
+                <input type="text" id="filterInput" class="form-control" placeholder="Buscar materiales..." onkeyup="filterCards()">
+            </div>
+            <div class="row" id="materialCards">
+                {% for material in materials %}
+                <div class="col-12 col-md-4 mb-4"> <!-- Tarjetas responsivas -->
+                    <div class="card text-center"> <!-- Tarjeta sin borde ni color de fondo -->
+                        <img src="{{ material.content }}" class="card-img-top mx-auto" alt="Imagen de {{ material.get_type_display }}" style="height: 200px; object-fit: cover; max-width: 100%;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ material.get_type_display }}</h5>
+                            <p class="card-text">ID: {{ material.id }}</p>
+                            <p class="card-text">{{ material.text_content }}</p>
+                            <div class="d-flex justify-content-center"> <!-- Centrado de botones -->
+                                <a class="btn btn-info mx-1" href="{% url 'update_material' material.id %}">Actualizar</a>
+                                <a class="btn btn-danger mx-1" href="{% url 'delete_material' material.id %}">Eliminar</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <p class="text-center">No hay materiales disponibles.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card-footer text-muted">
+            <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
         </div>
     </div>
-    <div class="card-footer text-muted">
-        <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
-    </div>
 </div>
+
+<script>
+function filterCards() {
+    const input = document.getElementById('filterInput');
+    const filter = input.value.toLowerCase();
+    const cards = document.querySelectorAll('#materialCards .col-12');
+
+    cards.forEach(card => {
+        const title = card.querySelector('.card-title').textContent.toLowerCase();
+        const textContent = card.querySelector('.card-text').textContent.toLowerCase();
+        
+        // Comprobar si el título o el contenido de texto incluye el filtro
+        if (title.includes(filter) || textContent.includes(filter)) {
+            card.style.display = ""; // Muestra la tarjeta
+        } else {
+            card.style.display = "none"; // Oculta la tarjeta
+        }
+    });
+}
+</script>
+
 {% endblock %}

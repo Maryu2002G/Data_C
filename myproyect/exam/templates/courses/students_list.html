@@ -1,0 +1,10 @@
+<!-- students_list.html -->
+<h2>Estudiantes en {{ course.nomCourse }}</h2>
+<ul>
+    {% for student in students %}
+    <li>{{ student.user.get_full_name }}</li>
+    {% empty %}
+    <li>No hay estudiantes inscritos en este curso.</li>
+    {% endfor %}
+</ul>
+<a href="{% url 'courses' %}" class="btn btn-secondary">Regresar a Cursos</a>

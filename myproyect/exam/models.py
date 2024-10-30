@@ -37,10 +37,23 @@ class Asignature(models.Model):
 
 class Course(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')
-    nomCourse = models.CharField(max_length=25, verbose_name='Nombre del Curso')
-       
+    nomCourse = models.CharField(max_length=25, verbose_name='Nombre del Curso', unique=True)
+    profesor = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        limit_choices_to={'groups__name': 'Profesor'},
+        verbose_name='Profesor',
+        null=True  # Permite valores nulos temporalmente
+    )
+
+    def save(self, *args, **kwargs):
+        # Convertir el nombre del curso a mayúsculas antes de guardarlo
+        self.nomCourse = self.nomCourse.upper()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return self.nomCourse 
+        return self.nomCourse
+
 
 class Career(models.Model):
     id = models.AutoField(primary_key=True, verbose_name='ID')

@@ -1,0 +1,49 @@
+{% extends "nav_ase.html" %}
+{% block titulo %} Lista de Profesores y Cursos {% endblock %}
+{% block contenido %} 
+<div class="card">
+    <div class="card-header">
+       <a class="btn btn-primary" href="{% url 'register' %}" role="button">Agregar nuevo profesor</a>
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Profesores y sus Cursos</h4>
+        <div class="table-responsive">
+            <table class="table table-primary">
+                <thead>
+                    <tr>
+                        <th scope="col">ID del Profesor</th>
+                        <th scope="col">Nombre del Profesor</th>
+                        <th scope="col">Cursos Asignados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profesor in profesores %}
+                    <tr>
+                        <td scope="row">{{ profesor.id }}</td>
+                        <td>{{ profesor.username }}</td>
+                        <td>
+                            {% if profesor.course_set.count > 0 %}
+                                <ul>
+                                    {% for curso in profesor.course_set.all %}
+                                        <li>{{ curso.nomCourse }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                Sin cursos asignados
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">No hay profesores disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
+    </div>
+</div>
+{% endblock %}

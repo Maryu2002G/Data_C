@@ -49,10 +49,13 @@ urlpatterns = [
 
     # Cursos
     path('courses/', views.courses, name='courses'),
+    path('courses/<int:course_id>/students/', views.course_students, name='course_students'),  # URL para la lista de estudiantes
     path('courses/create/', views.CreateCourse, name='create_course'),
     path('courses/update/', views.UpdateCourse, name='update_course'),
     path('courses/update/<int:id>/', views.UpdateCourse, name='update_course'),
     path('courses/delete/<int:id>/', views.DeleteCourse, name='delete_course'),
+    
+    path('profesores/', views.listar_profesores_y_cursos, name='listar_profesores_y_cursos'),
 
     # Estudiantes
     path('students/', views.students, name='students'),
@@ -60,6 +63,7 @@ urlpatterns = [
     path('students/update/', views.UpdateStudent, name='update_student'),
     path('students/update/<int:id>/', views.UpdateStudent, name='update_student'),
     path('students/delete/<int:id>/', views.DeleteStudent, name='delete_student'),
+    path('estudiantes-por-curso/', views.estudiantes_por_curso, name='estudiantes_por_curso'),
 
     # Carreras
     path('careers/', views.careers, name='careers'),

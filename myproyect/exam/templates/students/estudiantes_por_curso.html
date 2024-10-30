@@ -1,0 +1,41 @@
+{% extends "nav_pro.html" %}
+{% block titulo %} Estudiantes por Curso {% endblock %}
+{% block contenido %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="text-center">Estudiantes por Curso</h1>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="curso">Selecciona un Curso:</label>
+                    <select name="curso" id="curso" class="form-control" required>
+                        <option value="">-- Selecciona un Curso --</option>
+                        {% for curso in cursos %}
+                        <option value="{{ curso.id }}">{{ curso.nomCourse }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Ver Estudiantes</button>
+            </form>
+
+            {% if estudiantes %}
+            <h4 class="mt-4">Estudiantes en el Curso: {{ curso_seleccionado.nomCourse }}</h4>
+            <ul class="list-group mt-3">
+                {% for estudiante in estudiantes %}
+                <li class="list-group-item">
+                    <strong>Nombre:</strong> {{ estudiante.user.first_name }} {{ estudiante.user.last_name }} |
+                    <strong>Correo:</strong> {{ estudiante.user.email }} |
+                    <strong>Carrera:</strong> {{ estudiante.career.nombre }}
+                </li>
+                {% empty %}
+                <li class="list-group-item">No hay estudiantes en este curso.</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

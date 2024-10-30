@@ -29,6 +29,10 @@ class CourseForm(forms.ModelForm):
         model = Course
         fields = '__all__'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtra el queryset de 'profesor' para incluir solo usuarios en el grupo 'Profesor'
+        self.fields['profesor'].queryset = User.objects.filter(groups__name='Profesor')
 
 
 
@@ -54,17 +58,14 @@ class TestForm(forms.ModelForm):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)  # Obtener el usuario logueado
         super(TestForm, self).__init__(*args, **kwargs)
-        
-        # Filtro para que solo muestre a los usuarios con rol de profesor
-        self.fields['userProfesor'].queryset = User.objects.filter(groups__name='Profesor')
-        self.fields['userProfesor'].empty_label = "Seleccionar"
 
-        # Etiqueta vacía para el campo 'course'
-        self.fields['course'].empty_label = "Seleccionar"
-
-        # Etiqueta vacía para el campo 'typeExa'
-        self.fields['typeExa'].empty_label = "Seleccionar"
+        # Filtrar cursos donde el profesor es el usuario logueado
+        if user:
+            self.fields['course'].queryset = Course.objects.filter(profesor=user)
+        else:
+            self.fields['course'].queryset = Course.objects.none()  # Ninguna opción si no hay usuario
 
       
 class ExamResultForm(forms.ModelForm):

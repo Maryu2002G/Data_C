@@ -62,13 +62,18 @@ def Home(request):
         messages.error(request, 'No role assigned. Please contact the administrator.')
         return redirect('login')  # Redirige si no tiene rol asignado
     
-@login_required(login_url='login')
+
 @group_required('Profesor')
 def profesor_view(request):
     user = request.user
+    profesor = User.objects.get(id=user.id)  # Asumiendo que User es tu modelo de usuario
+    cursos = Course.objects.filter(profesor=profesor)
+    
     context = {
             'username': user.username,
             'rol': 'Profesor',
+            'cantidad_cursos': cursos.count(),
+            'profesor': profesor,
         }
     return render(request, 'paginas/profesor.html', context)  # Renderiza la página para profesores
 
@@ -118,7 +123,30 @@ def roles(request):
     return render(request, 'roles/index.html', {'roles': roles})
 
 
+@login_required
+def estudiantes_por_curso(request):
+    # Obtén el profesor logueado
+    profesor = request.user
+
+    # Obtén los cursos del profesor
+    cursos = Course.objects.filter(profesor=profesor)
+
+    # Si se ha seleccionado un curso, obtén los estudiantes de ese curso
+    estudiantes = []
+    curso_seleccionado = None
+
+    if request.method == "POST":
+        curso_id = request.POST.get('curso')
+        curso_seleccionado = get_object_or_404(Course, id=curso_id)
+        estudiantes = Student.objects.filter(course=curso_seleccionado)
+
+    context = {
+        'cursos': cursos,
+        'estudiantes': estudiantes,
+        'curso_seleccionado': curso_seleccionado,
+    }
     
+    return render(request, 'students/estudiantes_por_curso.html', context) 
 
 def CreateRole(request):
     user = request.user
@@ -393,7 +421,19 @@ def DeleteCareers(request, id):
 # Materials----------------------------------------------------------------Pendiente aun no muestra la img 
 def materials(request):
     client = coreapi.Client()
-    schema = client.get("http://localhost:8000/docs/")
+    schema = client.get("http://localhost:8090/docs/")
+    
+    try:
+        materials_data = client.action(schema, ["materials", "list"])
+        base_url = "https://zn4zz9nw-8090.use2.devtunnels.ms/media/materials/"
+        for material in materials_data:
+           
+            material['image_url'] = base_url + material['content']  
+    except coreapi.exceptions.ErrorMessage as e:
+        print(f"Error al consumir la API: {e}")
+        materials_data = []
+
+    return render(request, 'materials/index.html', {'materials': materials_data})
 
     try:
         materials_data = client.action(schema, ["materials", "list"])
@@ -404,38 +444,74 @@ def materials(request):
     return render(request, 'materials/index.html', {'materials': materials_data})
 
 def CreateMaterials(request):
-    formulario = AsignatureForm(request.POST or None)
-    
+    formulario = MaterialForm(request.POST or None)
     if formulario.is_valid():
-        nameAs = formulario.cleaned_data['nameAs'].upper()
+        content = formulario.cleaned_data['content']
+        text_content = formulario.cleaned_data['text_content']
         client = coreapi.Client()
-        schema = client.get("http://localhost:8000/docs/")
+        schema = client.get("http://127.0.0.1:8090/docs/") 
         try:
-            params = {"nameAs": nameAs}
-            client.action(schema, ["asignatures", "create"], params=params)
-            return redirect('asignature')
+            params = {
+                "content": content,
+                "text_content": text_content
+            }
+            client.action(schema, ["materials", "create"], params=params)
+            return redirect('material_list') 
         except coreapi.exceptions.ErrorMessage as e:
-          
-            print(f"Error al crear la asignatura en la API: {e}")
-            formulario.add_error(None, "No se pudo crear la asignatura en la API.")
-    return render(request, 'asignature/create.html', {'formulario': formulario})
+            print(f"Error al crear el material en la API: {e}")
+            formulario.add_error(None, "No se pudo crear el material en la API.")
+    
+    return render(request, 'materials/create.html', {'formulario': formulario})
 
 def UpdateMaterials(request, id):
-    material = get_object_or_404(Material, id=id)
-    formulario = MaterialForm(request.POST or None, instance=material)
-    if formulario.is_valid():
-        material.type = formulario.cleaned_data['type'].upper()
-        material.description = formulario.cleaned_data['description'].upper()
-        material.year = formulario.cleaned_data['year']
-        material.career = formulario.cleaned_data['career']
-        material.save()
-        return redirect('materials')
+    client = coreapi.Client()
+    schema = client.get("http://127.0.0.1:8090/docs/")
+    try:
+        material_list = client.action(schema, ["materials", "list"])
+        material_data = next((item for item in material_list if item['id'] == id), None)
+        
+        if not material_data:
+            messages.error(request, "Material no encontrado.")
+            return redirect('material_list')  
+        formulario = MaterialForm(initial={
+            "content": material_data['content'],
+            "text_content": material_data['text_content']
+        })
+    except coreapi.exceptions.ErrorMessage as e:
+        print(f"Error al recuperar el material desde la API: {e}")
+        messages.error(request, "No se pudo recuperar el material.")
+        return redirect('material_list') 
+
+    if request.method == 'POST':
+       
+        formulario = MaterialForm(request.POST)
+        if formulario.is_valid():
+            content = formulario.cleaned_data['content']
+            text_content = formulario.cleaned_data['text_content']
+            try:
+                params = {
+                    "id": id,
+                    "content": content,
+                    "text_content": text_content
+                }
+                client.action(schema, ["materials", "update"], params=params)
+                messages.success(request, "Material actualizado correctamente.")
+                return redirect('material_list') 
+            except coreapi.exceptions.ErrorMessage as e:
+                print(f"Error al actualizar el material en la API: {e}")
+                formulario.add_error(None, "No se pudo actualizar el material en la API.")
     return render(request, 'materials/update.html', {'formulario': formulario})
 
 def DeleteMaterials(request, id):
-    material = get_object_or_404(Material, id=id)
-    material.delete()
-    return redirect('materials')
+    client = coreapi.Client()
+    schema = client.get("http://127.0.0.1:8090/docs/")
+    try:
+        client.action(schema, ["materials", "delete"], params={"id": id})
+        messages.success(request, "Material eliminado correctamente.")
+    except coreapi.exceptions.ErrorMessage as e:
+        print(f"Error al eliminar el material en la API: {e}")
+        messages.error(request, "No se pudo eliminar el material en la API.")
+    return redirect('material_list')
 
 # Questions-----------------------------------------------
 def questions_view(request):
@@ -484,7 +560,7 @@ def CreateQuestions(request):
             formulario.add_error(None, "No se pudo crear la pregunta en la API.")
     
     # Renderiza el formulario y envía las asignaturas como contexto
-    return render(request, 'questions/create.html', {'formulario': formulario, 'asignaturas': asignaturas})
+    return render(request, 'questions/create.html', {'formulario': formulario, 'asignaturas': asignaturas,'user': request.user,})
 
 def UpdateQuestions(request, id):
     question = get_object_or_404(Question, id=id)
@@ -513,13 +589,20 @@ def test_view_a(request):
     return render(request, 'tes/form.html', {
         'asignatures': asignatures
     })
-
+    
+@login_required
 def CreateTest(request):
-    formulario = TestForm(request.POST or None)
+    # Filtrar cursos donde el profesor es el usuario logueado
+    cursos_profesor = Course.objects.filter(profesor=request.user)
+
+    # Crear el formulario y asignar los cursos disponibles
+    formulario = TestForm(request.POST or None, user=request.user)  # Pasar el usuario logueado al formulario
+
     if formulario.is_valid():
+        # Usar el usuario logueado como el profesor
         new_test = Test(
-            idUserProfesor=formulario.cleaned_data['idUserProfesor'],
-            idCourse=formulario.cleaned_data['idCourse'],
+            idUserProfesor=request.user,  # Usar el usuario logueado
+            idCourse=formulario.cleaned_data['course'],
             idQuestion=formulario.cleaned_data['idQuestion'],
             testDate=formulario.cleaned_data['testDate'],
             testTime=formulario.cleaned_data['testTime'],
@@ -527,7 +610,9 @@ def CreateTest(request):
         )
         new_test.save()
         return redirect('test')
-    return render(request, 'test/create.html', {'formulario': formulario})
+
+    # Pasar los cursos filtrados al contexto
+    return render(request, 'test/create.html', {'formulario': formulario, 'cursos_profesor': cursos_profesor})
 
 def UpdateTest(request, id):
     test = get_object_or_404(Test, id=id)
@@ -593,7 +678,7 @@ def exam_results_view(request):
         'total_students': total_students,
         'total_courses': total_courses,
         'total_results': total_results,
-        
+        'user': request.user,
     }
 
     return render(request, 'exam_results/index.html', context)
@@ -610,6 +695,10 @@ def CreateExamResult(request):
         return redirect('exam_results')
     return render(request, 'exam_results/create.html', {'formulario': formulario})
 # views.py
+def listar_profesores_y_cursos(request):
+    # Obtener usuarios del grupo 'Profesor'
+    profesores = User.objects.filter(groups__name='Profesor').prefetch_related('course_set')
+    return render(request, 'profesor/listar_profe.html', {'profesores': profesores})
 
 def UpdateExamResult(request, id):
     # Obtén el resultado del examen o retorna 404 si no existe
@@ -665,17 +754,35 @@ def DeleteProfessorSubject(request, id):
 
 # Courses View
 def courses(request):
-    courses = Course.objects.all()  # Asegúrate de tener un modelo Course
-    return render(request, 'courses/index.html', {'courses': courses})
+    courses = Course.objects.all()
+    course_names = []
+    student_counts = []
+
+    for course in courses:
+        student_count = Student.objects.filter(course=course).count()  # Contar estudiantes por curso
+        course_names.append(course.nomCourse)
+        student_counts.append(student_count)
+    # Agrega la cantidad de estudiantes a cada curso
+    for course in courses:
+        course.num_students = Student.objects.filter(course=course).count()
+        
+    # Retorna la respuesta renderizada
+    return render(request, 'courses/index.html', {'courses': courses,
+                                                  'course_names': course_names,
+        'student_counts': student_counts,'user': request.user,})
+ 
+def course_students(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    students = course.student_set.all()  # Obtiene todos los estudiantes del curso
+    return render(request, 'courses/students_list.html', {'course': course, 'students': students,'user': request.user,})       
+
 def CreateCourse(request):
-    formulario = CourseForm(request.POST or None)  
+    formulario = CourseForm(request.POST or None)
     if formulario.is_valid():
-        print(formulario.cleaned_data)  # Agrega esta línea para depuración
-        nomCourse = formulario.cleaned_data['nomCourse'].upper()
-        new_course = Course(nomCourse=nomCourse)
-        new_course.save()
+        formulario.instance.nomCourse = formulario.cleaned_data['nomCourse'].upper()
+        formulario.save()  # Guarda todos los campos, incluyendo 'profesor'
         return redirect('courses')
-    return render(request, 'courses/create.html', {'formulario': formulario})
+    return render(request, 'courses/create.html', {'formulario': formulario,'user': request.user,})
 
 
 def UpdateCourse(request, id):
@@ -763,6 +870,7 @@ def list_tests(request):
         'asignatures': asignatures,
         'username': user.username,
         'rol': 'Profesor',
+        'user': request.user,
     })
    
 @login_required(login_url='login')     
@@ -788,6 +896,7 @@ def list_testsStud(request):
         'asignatures': asignatures,
         'username': user.username,
         'rol': 'Estudiante',
+        'user': request.user,
     })
 
 # Crear un nuevo test
@@ -1083,7 +1192,8 @@ def take_exam(request, test_id):
         'questions': questions,
         'total_time': request.session.get('remaining_time', total_time),  # Pasar tiempo restante a la plantilla
         'num_questions': num_questions,
-        'remaining_time': request.session.get('remaining_time', total_time)  # Pasar tiempo restante a la plantilla
+        'remaining_time': request.session.get('remaining_time', total_time) , # Pasar tiempo restante a la plantilla
+        'user': request.user,
     }
     return render(request, 'exams/take_exam.html', context)
 #colocar el filtro
@@ -1221,7 +1331,7 @@ def exam_result(request, test_id):
         return render(request, 'exams/result.html', context)
     else:
         # Si no hay resultados, puedes mostrar un mensaje o manejarlo de otra forma
-        return render(request, 'exams/no_results.html', {'test': test})
+        return render(request, 'exams/no_results.html', {'test': test,'user': request.user,})
        
 class EmailVerification(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
