@@ -1,0 +1,17 @@
+{% extends "nav.html" %}
+{% block titulo %} Agregar Material {% endblock %}
+{% block contenido %} 
+
+<h2 class="text-center my-4">Formulario para Agregar Material</h2>
+
+<div class="d-flex justify-content-center">
+    <div class="card" style="width: 80%; max-width: 800px;"> <!-- Ajuste de ancho -->
+        <div class="card-body">
+            <h5 class="card-title text-center">Materials</h5>
+            {% csrf_token %}
+            {% include "materials/form.html" %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

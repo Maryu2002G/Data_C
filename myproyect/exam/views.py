@@ -425,18 +425,15 @@ def materials(request):
     
     try:
         materials_data = client.action(schema, ["materials", "list"])
+        
+        # Base URL para las imágenes
         base_url = "https://zn4zz9nw-8090.use2.devtunnels.ms/media/materials/"
+        
+        # Construir la URL completa para cada material
         for material in materials_data:
            
-            material['image_url'] = base_url + material['content']  
-    except coreapi.exceptions.ErrorMessage as e:
-        print(f"Error al consumir la API: {e}")
-        materials_data = []
+            material['image_url'] = base_url + material['content']  # Usa un nuevo campo para almacenar la URL de la imagen
 
-    return render(request, 'materials/index.html', {'materials': materials_data})
-
-    try:
-        materials_data = client.action(schema, ["materials", "list"])
     except coreapi.exceptions.ErrorMessage as e:
         print(f"Error al consumir la API: {e}")
         materials_data = []
@@ -444,19 +441,22 @@ def materials(request):
     return render(request, 'materials/index.html', {'materials': materials_data})
 
 def CreateMaterials(request):
-    formulario = MaterialForm(request.POST or None)
+    formulario = MaterialForm(request.POST or None, request.FILES or None)
+    
     if formulario.is_valid():
-        content = formulario.cleaned_data['content']
-        text_content = formulario.cleaned_data['text_content']
+        content = formulario.cleaned_data.get('content')  # Puede ser None
+        text_content = formulario.cleaned_data.get('text_content')  # Puede ser None
+        
         client = coreapi.Client()
-        schema = client.get("http://127.0.0.1:8090/docs/") 
+        schema = client.get("http://127.0.0.1:8090/docs/")
+        
         try:
             params = {
                 "content": content,
                 "text_content": text_content
             }
             client.action(schema, ["materials", "create"], params=params)
-            return redirect('material_list') 
+            return redirect('material_list')  # Redirige a la lista de materiales
         except coreapi.exceptions.ErrorMessage as e:
             print(f"Error al crear el material en la API: {e}")
             formulario.add_error(None, "No se pudo crear el material en la API.")
@@ -516,7 +516,7 @@ def DeleteMaterials(request, id):
 # Questions-----------------------------------------------
 def questions_view(request):
     client = coreapi.Client()
-    schema = client.get("http://localhost:8000/docs/")
+    schema = client.get("http://localhost:8090/docs/")
 
     try:
         questions_data = client.action(schema, ["questions", "list"])
@@ -541,7 +541,7 @@ def CreateQuestions(request):
 
         # Configura la conexión con la API usando coreapi
         client = coreapi.Client()
-        schema = client.get("http://localhost:8000/docs/")
+        schema = client.get("http://localhost:8090/docs/")
 
         # Prepara los parámetros para enviar a la API
         params = {

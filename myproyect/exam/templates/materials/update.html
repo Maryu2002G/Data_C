@@ -1,0 +1,12 @@
+{% extends "nav.html" %}
+{% block titulo %} Editar Material {% endblock  %}
+{% block contenido %} 
+<div class="card" style="width:18rem;">
+
+    <div class="card-body">
+      <h5 class="card-title">Editar Material</h5>
+      
+      {% include "materials/form.html" %} 
+    </div>
+  </div>
+{% endblock %}

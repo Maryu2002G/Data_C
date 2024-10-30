@@ -1,0 +1,135 @@
+<style>
+    /* Estilos personalizados para el formulario */
+    body {
+        background-color: #C7F9CC; /* Fondo general */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    .form-container {
+        width: 100%;
+        max-width: 800px; /* Ancho máximo del formulario */
+        padding: 40px; /* Espaciado interno */
+        background-color: transparent; /* Sin fondo adicional */
+    }
+
+    .form-label {
+        color: #22577A; /* Color de las etiquetas */
+        font-weight: bold;
+    }
+
+    .form-control {
+        border: 1px solid #38A3A5; /* Color de borde de los campos */
+        border-radius: 8px; /* Bordes redondeados de campos */
+        padding: 12px; /* Espaciado interno de campos */
+        font-size: 16px; /* Tamaño de letra mayor */
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 10px 20px;
+        width: 48%; /* Tamaño de los botones */
+        font-size: 16px; /* Tamaño de fuente mayor */
+        border-radius: 8px;
+    }
+
+    .btn-primary {
+        background-color: #80ED99; /* Color del botón de enviar */
+        border: none;
+        font-weight: bold;
+    }
+
+    .btn-secondary {
+        background-color: #57CC99; /* Color del botón de cancelar */
+        border: none;
+        font-weight: bold;
+    }
+
+    .img-thumbnail {
+        display: block;
+        margin: 15px auto;
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    .invalid-feedback {
+        color: red; /* Mensajes de error */
+    }
+</style>
+
+<div class="form-container">
+    <h3 class="text-center mb-4">Agregar Material</h3>
+    <form enctype="multipart/form-data" method="POST" class="row g-4 needs" novalidate>
+        {% csrf_token %}
+        
+        <!-- Campo de texto amplio para el contenido -->
+        <div class="col-12">
+            <label for="id_text_content" class="form-label">Texto del Contenido</label>
+            <textarea 
+                class="form-control {% if formulario.text_content.errors %} is-invalid {% endif %}"
+                name="text_content"
+                id="id_text_content"
+                rows="8"
+                placeholder="Escribe aquí el texto del contenido"
+            >{{ formulario.text_content.value|default_if_none:'' }}</textarea>
+            <div class="invalid-feedback">
+                {% for error in formulario.text_content.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Campo para cargar imagen -->
+        <div class="col-12">
+            <label for="id_content" class="form-label">Cargar Imagen</label>
+            {% if formulario.content.value %}
+                <img src="{{ formulario.content.value.url }}" alt="Imagen actual" class="img-thumbnail" name="holoi">
+            {% endif %}
+            <input
+                type="file"
+                class="form-control "
+                name="content"
+                id="id_content"
+                accept="image/*"
+            />
+      
+        </div>
+
+        <!-- Botones con separación y alineación centrada -->
+        <div class="col-12 d-flex justify-content-between mt-4">
+            <button type="submit" class="btn btn-primary">Enviar</button>
+            <a class="btn btn-secondary" href="{% url 'materials' %}">Cancelar</a>
+        </div>
+    </form>
+</div>
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Evita el comportamiento por defecto del formulario
+        
+        const formData = new FormData(this); // Recoge todos los datos del formulario
+
+        fetch("{% url 'create_material' %}", { // Cambia 'create_materials' al nombre de tu URL
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}', // Agrega el token CSRF
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json(); // Supón que envías una respuesta JSON
+            }
+            throw new Error('Error en la red.');
+        })
+        .then(data => {
+            alert('Material creado con éxito.');
+            window.location.href = "{% url 'materials' %}"; // Redirige a la lista de materiales
+        })
+        .catch(error => {
+            alert('Hubo un problema: ' + error.message);
+        });
+    });
+</script>

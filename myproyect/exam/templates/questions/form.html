@@ -9,7 +9,7 @@
                 <img src="{{ campo.value.url }}" alt="{{ campo.label }}" width="100">
             {% endif %}
         
-            {% if campo.field.widget.input_type == 'select' %}
+            {% if campo.name == 'idAsignature' %}  <!-- Campo para asignatura -->
                 <select class="form-select {% if campo.errors %} is-invalid {% endif %}" name="{{ campo.name }}" id="{{ campo.auto_id }}">
                     {% for option in campo.field.choices %}
                         <option value="{{ option.0 }}" {% if option.0 == campo.value %} selected {% endif %}>
@@ -17,14 +17,17 @@
                         </option>
                     {% endfor %}
                 </select>
-            {% elif campo.field.widget.input_type == 'select_multiple' %}
-                <select class="form-select {% if campo.errors %} is-invalid {% endif %}" name="{{ campo.name }}" id="{{ campo.auto_id }}" multiple>
-                    {% for option in campo.field.choices %}
-                        <option value="{{ option.0 }}" {% if option.0 in campo.value %} selected {% endif %}>
-                            {{ option.1 }}  <!-- Esto mostrará las opciones de los materiales -->
-                        </option>
-                    {% endfor %}
-                </select>
+            {% elif campo.field.widget.input_type == 'checkbox' %}
+                <div class="form-check">
+                    <input 
+                        type="checkbox"
+                        class="form-check-input"
+                        name="{{ campo.name }}"
+                        id="{{ campo.auto_id }}"
+                        value="true"
+                        {% if campo.value %} checked {% endif %}
+                    />
+                </div>
             {% else %}
                 <input
                     type="{{ campo.field.widget.input_type }}"
