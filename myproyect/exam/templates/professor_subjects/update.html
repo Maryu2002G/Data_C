@@ -1,0 +1,12 @@
+{% extends "nav.html" %}
+{% block titulo %} Editar test_questions{% endblock  %}
+{% block contenido %} 
+<div class="card" style="width:18rem;">
+
+    <div class="card-body">
+      <h5 class="card-title">Editar professor_subjects</h5>
+      <h6 class="card-subtitle mb-2 text-muted ">Datos professor_subjects</h6>
+      {% include "professor_subjects/form.html" %} 
+    </div>
+  </div>
+{% endblock %}

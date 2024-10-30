@@ -1,0 +1,156 @@
+<!--no touch me is not cat -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen: {{ test.id }}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Obtener el tiempo total desde el contexto
+        let totalTime = {{ total_time }};
+        
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            const countdown = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                // Mostrar el tiempo en pantalla
+                document.getElementById('timer').textContent = minutes + ":" + seconds;
+
+                // Si el tiempo llega a 0, enviar el formulario
+                if (--timer < 0) {
+                    clearInterval(countdown);
+                    document.getElementById('exam-form').submit();  // Envía el formulario
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            startTimer(totalTime);
+        };
+
+    </script>
+    <style>
+        body {
+            background-color: #eafaf1; /* Color de fondo suave */
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            display: flex; /* Usamos flexbox para colocar el contenido */
+        }
+        .exam-content {
+            flex: 1; /* Ocupa el espacio restante */
+            margin-right: 20px; /* Espacio a la derecha para la lista de preguntas */
+            background-color: #ffffff; /* Fondo blanco para el formulario */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .questions-list {
+            width: 25%; /* Ancho de la lista de preguntas */
+            background-color: #f0fff0; /* Fondo verde pastel */
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .question {
+            margin-bottom: 20px;
+            border: 1px solid #cce5d0; /* Borde verde pastel */
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f0fff0; /* Color de fondo para preguntas */
+        }
+        .timer {
+            font-size: 1.5rem;
+            color: #28a745; /* Color verde */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #28a745; /* Botón verde */
+            border: none;
+        }
+        button:hover {
+            background-color: #218838; /* Color más oscuro al pasar el mouse */
+        }
+        .question-number {
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .question-number.unanswered {
+            background-color: #d4edda; /* Fondo verde pastel para no respondidas */
+        }
+        .question-number.answered {
+            background-color: #c3e6cb; /* Fondo verde más oscuro para respondidas */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="exam-content">
+            <h1 class="text-center text-success">Examen: {{ test.id }}</h1>
+            <div class="timer" id="timer">01:35</div> <!-- Mostrar el tiempo -->
+            <form id="exam-form" method="POST" onsubmit="saveAnswers();">
+                {% csrf_token %}
+                {% for question in questions %}
+                    <div class="question" id="question_{{ question.id }}">
+                        <p><strong>{{ question.question }}</strong></p>
+                        {% for option in question.options %}
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" name="question_{{ question.id }}" value="{{ option }}" id="option_{{ question.id }}_{{ forloop.counter }}">
+                                <label class="form-check-label" for="option_{{ question.id }}_{{ forloop.counter }}">{{ option }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-lg btn-success btn-block">Enviar Respuestas</button>
+            </form>
+        </div>
+        <div class="questions-list">
+            <h2>Lista de Preguntas</h2>
+            <div id="questions-status">
+                {% for question in questions %}
+                    <div class="question-number unanswered" id="status_{{ question.id }}" onclick="scrollToQuestion({{ question.id }})">Pregunta {{ forloop.counter }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <script>
+        function updateQuestionStatus(index) {
+            const statusElement = document.getElementById('status_' + index);
+            statusElement.classList.remove('unanswered');
+            statusElement.classList.add('answered');
+        }
+
+        function scrollToQuestion(questionId) {
+            const questionElement = document.getElementById('question_' + questionId);
+            questionElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function saveAnswers() {
+            // Almacenar la respuesta seleccionada en localStorage
+            document.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.addEventListener('change', function () {
+                    localStorage.setItem(this.name, this.value);
+                });
+            });
+
+            // Guardar el tiempo restante antes de salir
+            localStorage.setItem('remainingTime', totalTime);
+        }
+    </script>
+</body>
+</html>

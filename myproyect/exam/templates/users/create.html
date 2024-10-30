@@ -1,0 +1,15 @@
+{% extends "nav.html" %}
+
+{% block titulo %} Agregar nuevo Usuario {% endblock %}
+
+{% block contenido %}
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow" style="width: 25rem; border-radius: 15px;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #22577A; font-weight: bold;">Crear Usuario</h5>
+                
+                {% include "users/form.html" %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

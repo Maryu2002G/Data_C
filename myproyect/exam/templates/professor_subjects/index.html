@@ -1,0 +1,46 @@
+{% extends "nav.html" %}
+{% block titulo %} Lista de Asignaturas de Profesores {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+       <a name="" id="" class="btn btn-primary" href="{% url 'create_professor_subject' %}" role="button">Agregar nueva asignatura</a>
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Asignaturas de Profesores</h4>
+        <div class="table-responsive">
+            <table class="table table-primary">
+                <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Profesor</th>
+                        <th scope="col">Asignatura</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for professor_subject in professor_subjects %}
+                    <tr>
+                        <td scope="row">{{ professor_subject.id }}</td>
+                        <td>{{ professor_subject.idProfessor.name }}</td> <!-- Cambia a .name -->
+                        <td>{{ professor_subject.idAsignature.name }}</td> <!-- Cambia a .name -->
+                        <td> 
+                            <a class="btn btn-info" href="{% url 'update_professor_subject' professor_subject.id %}" role="button">Actualizar</a>
+                            |  
+                            <a class="btn btn-danger" href="{% url 'delete_professor_subject' professor_subject.id %}" role="button">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No hay asignaturas disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <!-- Pie de tarjeta opcional -->
+    </div>
+</div>
+{% endblock %}

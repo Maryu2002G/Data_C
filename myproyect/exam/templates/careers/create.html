@@ -1,0 +1,15 @@
+{% extends "nav.html" %}
+{% block titulo %} Agregar carrera {% endblock  %}
+{% block contenido %} Formulario para agregar nuevo rol 
+
+
+<div class="card" style="width:18rem;">
+
+  <div class="card-body">
+    <h5 class="card-title">Crear carrera</h5>
+    <h6 class="card-subtitle mb-2 text-muted ">Datos carrera</h6>
+    {% include "careers/form.html" %} 
+  </div>
+</div>
+
+{% endblock %}

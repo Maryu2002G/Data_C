@@ -1,0 +1,155 @@
+
+{% extends "nav_ase.html" %}
+{% block titulo %} Inicio {% endblock %}
+{% block contenido %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Registro</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+  </head>
+  <body>
+    <div class="center">
+      <h1>Registrar Usuario</h1>
+
+      {% if messages %}
+          {% for message in messages %}
+              {% if message.tags == 'error' %}
+                  <center><h4 style="color: firebrick;">{{message}}</h4></center>
+              {% else %}
+                  <center><h4 style="color: dodgerblue;">{{message}}</h4></center>
+              {% endif %}
+          {% endfor %}
+      {% endif %}
+        
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="txt_field">
+          <input type="text" required name="first_name">
+          <span></span>
+          <label>Primer nombre</label>
+        </div>
+
+        <div class="txt_field">
+          <input type="text" required name="second_name">
+          <span></span>
+          <label>Segundo nombre</label>
+        </div>
+
+        <div class="txt_field">
+          <input type="text" required name="last_name">
+          <span></span>
+          <label>Apellidos</label>
+        </div>
+
+        <div class="txt_field">
+          <input type="text" required name="username">
+          <span></span>
+          <label>Nombre de usuario</label>
+        </div>
+
+        <div class="txt_field">
+          <input type="email" required name="email">
+          <span></span>
+          <label>Correo</label>
+        </div>
+
+        <div class="txt_field">
+          <input type="password" required name="password">
+          <span></span>
+          <label>Contraseña</label>
+        </div>  
+
+        <!-- Desplegable para seleccionar el grupo -->
+        <div class="form-group group">
+          <label for="group">Tipo de Usuario</label>
+          <select class="form-control custom-select" id="group" name="group" required onchange="handleGroupChange()">
+            <option value="">Selecciona un Tipo de usuario</option>
+            {% for group in groups %}
+              {% if forloop.counter <= 4 %}
+                <option value="{{ group.id }}" data-role="{{ group.role }}">{{ group.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Desplegable para seleccionar la carrera -->
+        <div class="form-group career" id="careerGroup" style="display: none;">
+          <label for="career">Carrera</label>
+          <select class="form-control custom-select" id="career" name="career">
+            {% for career in careers %}
+              <option value="{{ career.id }}">{{ career.nameCareer }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Campo de texto para el semestre -->
+        <div class="txt_field" id="semesterGroup" style="display: none;">
+          <input type="number" name="semester" min="1" max="10">
+          <span></span>
+          <label>Semestre</label>
+        </div>
+
+        <!-- Desplegable para seleccionar el curso -->
+        <div class="form-group course" id="courseGroup" style="display: none;">
+          <label for="course">Curso</label>
+          <select class="form-control custom-select" id="course" name="course">
+            {% for course in courses %}
+              <option value="{{ course.id }}">{{ course.nomCourse }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Mostrar asignatura si el grupo es de los últimos 5 (subasesor) -->
+        <div class="form-group subject" id="subjectGroup" style="display: none;">
+          <label for="subject">Asignatura</label>
+          <select class="form-control custom-select" id="subject" name="subject">
+            {% for group in groups %}
+              {% if forloop.counter >= 6 %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+              {% endif %}
+            {% endfor %}
+          </select>
+        </div>
+
+        <script>
+          function handleGroupChange() {
+            const groupSelect = document.getElementById("group");
+            const selectedOption = groupSelect.options[groupSelect.selectedIndex];
+            const selectedValue = selectedOption.value; // Obtiene el valor
+            const selectedText = selectedOption.text; // Obtiene el texto
+
+            // Muestra el valor y el texto en la consola
+            console.log("Valor seleccionado:", selectedValue);
+            console.log("Texto seleccionado:", selectedText);
+
+            // Ocultar todos los grupos relacionados
+            document.getElementById("careerGroup").style.display = "none";
+            document.getElementById("semesterGroup").style.display = "none";
+            document.getElementById("courseGroup").style.display = "none";
+            document.getElementById("subjectGroup").style.display = "none";
+            
+
+
+            // Mostrar elementos basados en la selección del grupo
+            if (selectedText === "Estudiante") {
+              document.getElementById("careerGroup").style.display = "block";
+              document.getElementById("courseGroup").style.display = "block";
+              document.getElementById("semesterGroup").style.display = "block";
+            } else if (selectedText === "SubAsesor") {
+              document.getElementById("subjectGroup").style.display = "block";
+            }
+          }
+        </script>
+
+
+
+        <input type="submit" value="Registrar">
+      </form>
+    </div>
+  </body>
+</html>
+{% endblock %}

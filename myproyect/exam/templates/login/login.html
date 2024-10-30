@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    {% load static %}
+    <meta charset="utf-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+  </head>
+  <body>
+    <h2>Simulador SaberPro</h2>
+    <h2>Universidad de Cundinamarca</h2>
+    <div class="center">
+      <h1>Acceso</h1>
+
+      {% if messages %}
+          {% for message in messages %}
+              {% if message.tags == 'error' %}
+                  <center><h4 style="color: firebrick;">{{message}}</h4></center>
+              {% else %}
+                  <center><h4 style="color: rgb(51, 177, 103);">{{message}}</h4></center>
+              {% endif %}
+          {% endfor %}
+      {% endif %}
+        
+      <form method="POST">
+        {% csrf_token %}
+    
+        <div class="txt_field">
+          <input type="text" required name="username"> 
+          <span></span>
+          <label>Nombre de Usuario</label>
+        </div>
+    
+        <div class="txt_field">
+          <input type="password" required name="password">
+          <span></span>
+          <label>Contraseña</label>
+        </div>
+
+        <input type="submit" value="Iniciar Sesión">
+        <div class="signup_link">
+          <p>Olvidaste tu contraseña? <a href="{% url 'forgot-password'%}">Recuperar Contraseña</a></p> 
+        </div>
+      </form>
+    </div>
+
+  </body>
+</html>

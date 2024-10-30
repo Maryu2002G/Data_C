@@ -1,0 +1,362 @@
+{% extends "nav.html" %}
+{% load static %}
+
+{% block titulo %} Dashboard de Resultados de Exámenes {% endblock %}
+
+{% block contenido %}
+<div class="container-fluid p-0">
+    <!-- Bienvenida -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card text-center" style="background-color: #38A3A5; color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">Bienvenido al Dashboard de Resultados de Exámenes</h5>
+                    <p class="card-text">Visualiza estadísticas importantes y gestiona resultados de exámenes.</p>
+                    <div class="d-flex justify-content-center">
+                        <a href="{% url 'create_exam_result' %}" class="btn btn-light btn-lg me-2">
+                            <i class="fas fa-plus"></i> Agregar Nuevo Resultado
+                        </a>
+                        <a href="" class="btn btn-light btn-lg">
+                            <i class="fas fa-file-pdf"></i> Exportar a PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtro de Fechas -->
+    <div class="row mb-3">
+        <div class="col-md-6 col-12 mb-3 mb-md-0">
+            <input type="date" id="startDate" class="form-control" placeholder="Fecha de Inicio">
+        </div>
+        <div class="col-md-6 col-12">
+            <input type="date" id="endDate" class="form-control" placeholder="Fecha de Fin">
+        </div>
+    </div>
+
+    <!-- Sección de Gráficas -->
+    <div class="row mb-4">
+        <!-- Gráfica de Puntajes por Fecha -->
+        <div class="col-md-3 col-12 mb-4">
+            <div class="card border-0 h-100">
+                <div class="card-header" style="background-color: #22577A; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Puntajes por Fecha</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="scoreByDateChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica de Puntajes por Curso -->
+        <div class="col-md-3 col-12 mb-4">
+            <div class="card border-0 h-100">
+                <div class="card-header" style="background-color: #80ED99; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Puntajes por Curso</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="scoreByCourseChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica de Puntajes por Estudiante -->
+        <div class="col-md-3 col-12 mb-4">
+            <div class="card border-0 h-100">
+                <div class="card-header" style="background-color: #38A3A5; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Puntajes por Estudiante</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="scoreByStudentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica de Aprobados y No Aprobados (Dona) -->
+        <div class="col-md-3 col-12 mb-4">
+            <div class="card border-0 h-100">
+                <div class="card-header" style="background-color: #C7F9CC; color: white;">
+                    <h5 class="mb-0"><i class="fas fa-check-circle"></i> Aprobados vs No Aprobados</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="approvalChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablas de Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-md-6 col-12 mb-4">
+            <div class="card border-0">
+                <div class="card-header" style="background-color: #57CC99; color: white;">
+                    <h5>Estadísticas Generales</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped mb-0">
+                        <tbody>
+                            <tr>
+                                <th>Media</th>
+                                <td>{{ average_score }}</td>
+                            </tr>
+                            <tr>
+                                <th>Mediana</th>
+                                <td>{{ median_score }}</td>
+                            </tr>
+                            <tr>
+                                <th>Total Aprobados</th>
+                                <td>{{ total_passed }}</td>
+                            </tr>
+                            <tr>
+                                <th>Total No Aprobados</th>
+                                <td>{{ total_failed }}</td>
+                            </tr>
+                            <tr>
+                                <th>Puntaje Máximo</th>
+                                <td>{{ max_score }}</td>
+                            </tr>
+                            <tr>
+                                <th>Puntaje Mínimo</th>
+                                <td>{{ min_score }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Datos Cargados -->
+        <div class="col-md-6 col-12 mb-4">
+            <div class="card border-0">
+                <div class="card-header" style="background-color: #57CC99; color: white;">
+                    <h5>Datos Cargados</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group mb-0">
+                        <li class="list-group-item"><strong>Total Exámenes:</strong> {{ total_exams }}</li>
+                        <li class="list-group-item"><strong>Total Estudiantes:</strong> {{ total_students }}</li>
+                        <li class="list-group-item"><strong>Total Cursos:</strong> {{ total_courses }}</li>
+                        <li class="list-group-item"><strong>Total Resultados:</strong> {{ total_results }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acordeón para Detalles de Resultados -->
+    <div class="accordion mb-4" id="examResultsAccordion">
+        {% for exam_result in exam_results %}
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                    Resultado de Examen de {{ exam_result.student_name }} (Fecha: {{ exam_result.fecha|date:"Y-m-d" }})
+                </button>
+            </h2>
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#examResultsAccordion">
+                <div class="accordion-body">
+                    <p><strong>Puntaje:</strong> {{ exam_result.score }}</p>
+                    <p><strong>Curso:</strong> {{ exam_result.test.course }}</p>
+                    <p><strong>Detalles Adicionales:</strong> {{ exam_result.details }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Scripts para las gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Recopilamos los datos por fecha y curso
+        var dataByDate = {};
+        var dataByCourse = {};
+        var dataByStudent = {};
+
+        // Contadores de aprobados y no aprobados
+        var totalPassed = {{ total_passed }};
+        var totalFailed = {{ total_failed }};
+
+        {% for exam_result in exam_results %}
+            // Agrupamos los puntajes por fecha
+            var examDate = '{{ exam_result.fecha|date:"Y-m-d" }}';
+            if (!dataByDate[examDate]) {
+                dataByDate[examDate] = 0;
+            }
+            dataByDate[examDate] += {{ exam_result.score }};
+
+            // Agrupamos los puntajes por curso
+            var courseName = '{{ exam_result.test.course }}';
+            if (!dataByCourse[courseName]) {
+                dataByCourse[courseName] = 0;
+            }
+            dataByCourse[courseName] += {{ exam_result.score }};
+            
+            // Agrupamos los puntajes por estudiante
+            var studentName = '{{ exam_result.student_name }}';
+            if (!dataByStudent[studentName]) {
+                dataByStudent[studentName] = 0;
+            }
+            dataByStudent[studentName] += {{ exam_result.score }};
+        {% endfor %}
+
+        // Configuración del gráfico de puntajes por fecha
+        var ctxScoreByDate = document.getElementById('scoreByDateChart').getContext('2d');
+        new Chart(ctxScoreByDate, {
+            type: 'line',
+            data: {
+                labels: Object.keys(dataByDate),
+                datasets: [{
+                    label: 'Puntajes por Fecha',
+                    data: Object.values(dataByDate),
+                    borderColor: '#80ED99',
+                    backgroundColor: 'rgba(80, 237, 153, 0.3)', // Color con transparencia
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4 // Suavidad a la línea
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#333'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e0e0e0'
+                        },
+                        ticks: {
+                            color: '#333'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: '#e0e0e0'
+                        },
+                        ticks: {
+                            color: '#333'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Configuración del gráfico de puntajes por curso
+        var ctxScoreByCourse = document.getElementById('scoreByCourseChart').getContext('2d');
+        new Chart(ctxScoreByCourse, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(dataByCourse),
+                datasets: [{
+                    label: 'Puntajes por Curso',
+                    data: Object.values(dataByCourse),
+                    backgroundColor: 'rgba(34, 87, 122, 0.6)', // Color con transparencia
+                    borderColor: '#22577A',
+                    borderWidth: 2,
+                    borderRadius: 10,
+                    hoverBackgroundColor: 'rgba(34, 87, 122, 0.8)', // Color de hover más oscuro
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#333'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e0e0e0'
+                        },
+                        ticks: {
+                            color: '#333'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Configuración del gráfico de puntajes por estudiante
+        var ctxScoreByStudent = document.getElementById('scoreByStudentChart').getContext('2d');
+        new Chart(ctxScoreByStudent, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(dataByStudent),
+                datasets: [{
+                    label: 'Puntajes por Estudiante',
+                    data: Object.values(dataByStudent),
+                    backgroundColor: 'rgba(55, 204, 153, 0.6)', // Color con transparencia
+                    borderColor: '#57CC99',
+                    borderWidth: 2,
+                    borderRadius: 10,
+                    hoverBackgroundColor: 'rgba(55, 204, 153, 0.8)', // Color de hover más oscuro
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#333'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#e0e0e0'
+                        },
+                        ticks: {
+                            color: '#333'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Configuración del gráfico de aprobados vs no aprobados (gráfica de dona)
+        var ctxApproval = document.getElementById('approvalChart').getContext('2d');
+        new Chart(ctxApproval, {
+            type: 'doughnut',
+            data: {
+                labels: ['Aprobados', 'No Aprobados'],
+                datasets: [{
+                    data: [totalPassed, totalFailed],
+                    backgroundColor: ['rgba(80, 237, 153, 0.8)', 'rgba(255, 72, 72, 0.8)'], // Colores con transparencia
+                    hoverOffset: 4,
+                    borderWidth: 3,
+                    borderColor: '#ffffff', // Borde blanco alrededor de la dona
+                    hoverBackgroundColor: ['rgba(80, 237, 153, 1)', 'rgba(255, 72, 72, 1)'], // Efecto de hover
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#333'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "nav.html" %}
+{% block titulo %} Activar Usuarios {% endblock %}
+{% block contenido %} 
+<div class="card">
+    <div class="card-header">
+        <h4 class="card-title">Usuarios a Activar</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Nombre de Usuario</th>
+                        <th scope="col">Aspiración</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users_with_aspiration %}
+                    <tr>
+                        <td scope="row">{{ user.user.id }}</td>
+                        <td>{{ user.user.username }}</td>
+                        <td>{{ user.aspiration }}</td>
+                        <td>
+                            <form action="{% url 'activate_user' user.user.id %}" method="POST" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="aspiracion" value="{{ user.aspiration }}"> <!-- Campo oculto para enviar la aspiración -->
+                                <button type="submit" class="btn btn-success">Activar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No hay usuarios disponibles para activar.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
+    </div>
+</div>
+{% endblock %}

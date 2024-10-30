@@ -1,0 +1,38 @@
+<form enctype="multipart/form-data" method="POST" class="row g-3 needs-validation" novalidate>
+  {% csrf_token %}
+
+  {% for campo in form %}
+    <div class="mb-3 col-md-6">  
+      <label for="{{ campo.auto_id }}" class="form-label">{{ campo.label }}</label>
+
+      {% if campo.field.widget.input_type == 'file' %}
+        <input type="file" class="form-control" name="{{ campo.name }}" id="{{ campo.auto_id }}">
+        {% if form.instance.pk and campo.name == 'material.archivo' %}  
+          <br>
+          <img src="{{ form.instance.material.archivo.url }}" alt="{{ campo.label }}" width="100">
+        {% endif %}
+      {% elif campo.field.widget.input_type == 'checkbox' %}
+        <div class="form-check">
+          <input type="checkbox" class="form-check-input" name="{{ campo.name }}" id="{{ campo.auto_id }}" value="true" {% if campo.value %} checked {% endif %}>
+          <label class="form-check-label" for="{{ campo.auto_id }}">{{ campo.label }}</label>
+        </div>
+      {% elif campo.field.choices %}
+        <select class="form-select {% if campo.errors %} is-invalid {% endif %}" name="{{ campo.name }}" id="{{ campo.auto_id }}" aria-label="{{ campo.label }}">
+          <option selected disabled>Seleccionar...</option>
+          {% for option_id, option_label in campo.field.choices %}
+            <option value="{{ option_id }}" {% if campo.value == option_id %} selected {% endif %}>{{ option_label }}</option>
+          {% endfor %}
+        </select>
+      {% else %}
+        <input type="{{ campo.field.widget.input_type }}" class="form-control {% if campo.errors %} is-invalid {% endif %}" name="{{ campo.name }}" id="{{ campo.auto_id }}" placeholder="{{ campo.label }}" value="{{ campo.value|default_if_none:'' }}">
+      {% endif %}
+
+      <div class="col-12 help-text" style="color:red">{{ campo.errors }}</div>
+    </div>
+  {% endfor %}
+
+  <div class="col-12">
+    <button class="btn btn-primary" type="submit">Enviar</button>
+    <a class="btn btn-secondary" href="{% url 'question_materials' %}">Cancelar</a>
+  </div>
+</form>

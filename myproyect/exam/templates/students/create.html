@@ -1,0 +1,15 @@
+{% extends "nav.html" %}
+{% block titulo %} Agregar Estudiantes {% endblock  %}
+{% block contenido %} Formulario para agregar nuevo estudiante
+
+
+<div class="card" style="width:18rem;">
+
+  <div class="card-body">
+    <h5 class="card-title">Crear estudiante</h5>
+    <h6 class="card-subtitle mb-2 text-muted ">Datos estudiante</h6>
+    {% include "students/form.html" %} 
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "nav.html" %}
+{% block titulo %} Lista de Asignaturas {% endblock %}
+{% block contenido %} 
+<div class="card">
+    <div class="card-header">
+       <a name="" id="" class="btn btn-primary" href="{% url 'create_asignature' %}" role="button">Agregar nueva asignatura</a>
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Asignaturas</h4>
+        <div class="table-responsive">
+            <table class="table table-primary">
+                <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Nombre de la Asignatura</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asignatura in asignatures %}
+                    <tr>
+                        <td scope="row">{{ asignatura.id }}</td>
+                        <td>{{ asignatura.nameAs }}</td>
+                        <td> 
+                            <a class="btn btn-info" href="{% url 'update_asignature' asignatura.id %}" role="button">Actualizar</a>
+                            |  
+                            <a class="btn btn-danger" href="{% url 'delete_asignature' asignatura.id %}" role="button">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
+    </div>
+</div>
+{% endblock %}

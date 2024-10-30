@@ -1,0 +1,56 @@
+<form enctype="multipart/form-data" method="POST" class="row g-3 needs-validation" novalidate>
+    {% csrf_token %}
+    {% for campo in formulario %}
+        <div class="mb-3">
+            <label for="{{ campo.auto_id }}" class="form-label">{{ campo.label }}</label>
+            
+            {% if campo.field.widget.input_type == 'file' and campo.value %}
+                <br>
+                <img src="{{ campo.value.url }}" alt="{{ campo.label }}" width="100">
+            {% endif %}
+        
+            {% if campo.field.widget.input_type == 'checkbox' %}
+                <div class="form-check">
+                    <input 
+                        type="checkbox"
+                        class="form-check-input"
+                        name="{{ campo.name }}"
+                        id="{{ campo.auto_id }}"
+                        value="true"
+                        {% if campo.value %} checked {% endif %}
+                    />
+                    <label class="form-check-label" for="{{ campo.auto_id }}">{{ campo.label }}</label>
+                </div>
+            {% elif campo.field.widget.input_type == 'select' %}
+                <select class="form-select {% if campo.errors %} is-invalid {% endif %}" name="{{ campo.name }}" id="{{ campo.auto_id }}">
+                    <option value="" disabled {% if not campo.value %} selected {% endif %}>Seleccione una opción</option>
+                    {% for option in campo.field.choices %}
+                        <option value="{{ option.0 }}" {% if option.0 == campo.value %} selected {% endif %}>
+                            {{ option.1 }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input
+                    type="{{ campo.field.widget.input_type }}"
+                    class="form-control {% if campo.errors %} is-invalid {% endif %}"
+                    name="{{ campo.name }}"
+                    id="{{ campo.auto_id }}"
+                    placeholder="{{ campo.label }}"
+                    value="{{ campo.value|default_if_none:'' }}"
+                    aria-invalid="{% if campo.errors %}true{% else %}false{% endif %}"
+                />
+            {% endif %}
+        </div>
+        <div class="col-12 help-text text-danger">
+            {% for error in campo.errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Actualizar</button>
+        <a class="btn btn-secondary" href="{% url 'asignature' %}">Cancelar</a>
+    </div>
+</form>

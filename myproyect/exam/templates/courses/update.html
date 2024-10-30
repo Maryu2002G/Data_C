@@ -1,0 +1,12 @@
+{% extends "nav.html" %}
+{% block titulo %} Editar nuevo curso {% endblock  %}
+{% block contenido %} 
+<div class="card" style="width:18rem;">
+
+    <div class="card-body">
+      <h5 class="card-title">Editar curso</h5>
+      <h6 class="card-subtitle mb-2 text-muted ">Datos del curso</h6>
+      {% include "courses/form.html" %} 
+    </div>
+  </div>
+{% endblock %}

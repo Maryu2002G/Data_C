@@ -1,0 +1,34 @@
+<form enctype="multipart/form-data" method="POST" class="row g-3 needs-validation" novalidate>
+    {% csrf_token %}
+    {% for campo in formulario %}
+        <div class="mb-3">
+            <label for="{{ campo.auto_id }}" class="form-label">{{ campo.label }}</label>
+
+            {% if campo.field.widget.input_type == 'select' %}
+                <select class="form-select {% if campo.errors %} is-invalid {% endif %}" name="{{ campo.name }}" id="{{ campo.auto_id }}">
+                    <option value="" disabled {% if not campo.value %} selected {% endif %}>Seleccionar {{ campo.label }}</option>
+                    {% for option in campo.field.choices %}
+                        <option value="{{ option.0 }}" {% if option.0 == campo.value %} selected {% endif %}>
+                            {{ option.1 }}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% else %}
+                <input
+                    type="{{ campo.field.widget.input_type }}"
+                    class="form-control {% if campo.errors %} is-invalid {% endif %}"
+                    name="{{ campo.name }}"
+                    id="{{ campo.auto_id }}"
+                    placeholder="{{ campo.label }}"
+                    value="{{ campo.value|default_if_none:'' }}"
+                />
+            {% endif %}
+        </div>
+        <div class="col-12 help-text text-danger">{{ campo.errors }}</div>
+    {% endfor %}
+
+    <div class="col-12">
+        <button class="btn btn-primary" type="submit">Enviar</button>
+        <a class="btn btn-secondary" href="{% url 'students' %}">Cancelar</a>
+    </div>
+</form>

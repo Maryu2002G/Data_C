@@ -1,0 +1,15 @@
+{% extends "nav.html" %}
+{% block titulo %} Agregar test_questions {% endblock  %}
+{% block contenido %} Formulario test_questions
+
+
+<div class="card" style="width:18rem;">
+
+  <div class="card-body">
+    <h5 class="card-title">Crear test_questions/h5>
+    <h6 class="card-subtitle mb-2 text-muted ">Datos de test_questions</h6>
+    {% include "test_questions/form.html" %} 
+  </div>
+</div>
+
+{% endblock %}

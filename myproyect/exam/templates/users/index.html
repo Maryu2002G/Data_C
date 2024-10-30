@@ -1,0 +1,208 @@
+{% extends "nav.html" %}
+
+{% block titulo %} Dashboard de Usuarios {% endblock %}
+
+{% block contenido %}
+<div class="container-fluid" style="padding-top: 0; margin-top: 0;">
+    <!-- Bienvenida -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card shadow-sm text-center" style="background-color: #38A3A5; color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">Bienvenido al Dashboard</h5>
+                    <p class="card-text">Gestiona usuarios y visualiza estadísticas importantes.</p>
+                    <a href="{% url 'create_user' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-user-plus"></i> Agregar Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Gráficos y Usuarios por Rol -->
+    <div class="row">
+        <!-- Estadísticas de Usuarios -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header" style="background-color: #22577A; color: white;">
+                    <h5><i class="fas fa-chart-bar"></i> Estadísticas de Usuarios</h5>
+                </div>
+                <div class="card-body" style="height: 200px;">
+                    <canvas id="userStatsChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Usuarios -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header" style="background-color: #80ED99; color: white;">
+                    <h5><i class="fas fa-users"></i> Usuarios</h5>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #38A3A5 #f0f0f0;">
+                    <!-- Input para filtro -->
+                    <input type="text" id="groupFilter" class="form-control mb-3" placeholder="Filtrar por grupo" onkeyup="filterUsers()">
+
+                    <!-- Lista de usuarios -->
+                    <ul class="list-group" id="userList">
+                        {% for user in users %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center user-item" 
+                            data-group="{% if user.groups.all %}{{ user.groups.all.0.name }}{% else %}Ninguno{% endif %}">
+                            <div>
+                                <strong>{{ user.first_name }} {{ user.last_name }}</strong><br>
+                                <span><strong>Email:</strong> {{ user.email }}</span><br>
+                                <span><strong>Grupo:</strong> 
+                                    {% if user.groups.all %}
+                                        {{ user.groups.all.0.name }}
+                                    {% else %}
+                                        Ninguno
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script>
+            function filterUsers() {
+                const filterValue = document.getElementById('groupFilter').value.toLowerCase(); // Convertir el valor del filtro a minúsculas
+                const userItems = document.querySelectorAll('.user-item'); // Seleccionar todos los elementos de usuario
+                
+                let filteredCount = 0; // Contador de elementos filtrados
+        
+                userItems.forEach(item => {
+                    const group = item.getAttribute('data-group') ? item.getAttribute('data-group').toLowerCase() : ''; // Obtener el grupo en minúsculas
+        
+                    // Comprobar si el grupo incluye el valor del filtro o si el filtro está vacío
+                    if (group.includes(filterValue) || filterValue === '') {
+                        item.style.display = 'flex'; // Mostrar el elemento si incluye el filtro
+                        filteredCount++; // Incrementar el contador
+                    } else {
+                        item.style.display = 'none'; // Ocultar el elemento
+                    }
+                });
+        
+                console.log(`Número de usuarios filtrados: ${filteredCount}`); // Mostrar el número de usuarios filtrados
+            }
+        </script>
+        
+        
+
+
+
+    </div>
+
+    <!-- Sección Adicional (Resumen General) -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background-color: #57CC99; color: white;">
+                    <h5><i class="fas fa-user-friends"></i> Total de Usuarios</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="display-4">{{ users.count }}</h2>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background-color: #38A3A5; color: white;">
+                    <h5><i class="fas fa-check-circle"></i> Usuarios Activos</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="display-4">{{ active_users.count }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background-color: #C7F9CC; color: white;">
+                    <h5><i class="fas fa-times-circle"></i> Usuarios Inactivos</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="display-4">{{ inactive_users.count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para el gráfico -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('userStatsChart').getContext('2d');
+    var userStatsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Estudiante', 'Profesor', 'Asesor', 'Sub asesor'], // Cambia esto según tus roles
+            datasets: [{
+                label: 'Cantidad de Usuarios',
+                data: [12, 19, 3, 5], // Cambia estos datos según los usuarios en cada rol
+                backgroundColor: [
+                    'rgba(225, 119, 122, 0.8)',
+                    'rgba(128, 237, 153, 0.8)',
+                    'rgba(56, 163, 165, 0.8)',
+                    'rgba(199, 249, 204, 0.8)'
+                ],
+                borderColor: [
+                    '#22577A',
+                    '#80ED99',
+                    '#38A3A5',
+                    '#C7F9CC'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+
+</script>
+
+<style>
+    /* Estilos para el scroll */
+    .accordion-body::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .accordion-body::-webkit-scrollbar-track {
+        background: #f0f0f0; /* Color del fondo del scroll */
+    }
+
+    .accordion-body::-webkit-scrollbar-thumb {
+        background-color: #38A3A5; /* Color del scroll */
+        border-radius: 10px; /* Bordes redondeados */
+    }
+
+    .accordion-body::-webkit-scrollbar-thumb:hover {
+        background-color: #2e7c7b; /* Color al pasar el ratón */
+    }
+
+    /* Estilos para el texto del dashboard */
+    h5, .card-title, .card-text {
+        font-family: 'Roboto', sans-serif; /* Asegúrate de que la fuente coincida con la del navbar */
+        font-size: 16px; /* Ajusta el tamaño según lo necesites */
+    }
+    .user-item {
+        display: flex; /* Asegúrate de que el valor por defecto sea 'flex' o el que necesites */
+    }
+    
+</style>
+
+{% endblock %}

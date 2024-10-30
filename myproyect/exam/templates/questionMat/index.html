@@ -1,0 +1,41 @@
+{% extends "nav.html" %}
+
+{% block titulo %} Lista de Materiales de Preguntas {% endblock %}
+
+{% block contenido %}
+
+<div class="card">
+  <div class="card-header">
+    <a name="" id="" class="btn btn-primary" href="{% url 'create_question_material' %}" role="button">Agregar Nuevo Material de Pregunta</a>
+  </div>
+  <div class="card-body">
+    <h4 class="card-title">Materiales de Preguntas</h4>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Nombre del Material</th>
+            <th scope="col">Pregunta Asociada</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for question_material in question_materials %}
+          <tr>
+            <th scope="row">{{ question_material.id }}</th>
+            <td>{{ question_material.material }}</td>
+            <td>{{ question_material.question }}</td>
+            <td>
+              <a class="btn btn-sm btn-info" href="{% url 'update_question_material' question_material.id %}" role="button">Actualizar</a>
+              <a class="btn btn-sm btn-danger" href="{% url 'delete_question_material' question_material.id %}" role="button">Eliminar</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

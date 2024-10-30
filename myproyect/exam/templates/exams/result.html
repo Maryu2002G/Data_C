@@ -1,0 +1,141 @@
+{% extends "nav_est.html" %}
+{% block contenido %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados del examen</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #22577A, #80ED99);
+            height: 100vh; /* Altura completa para el body */
+            overflow: hidden; /* Desactiva el scroll del body */
+        }
+
+        .content {
+            position: relative;
+            z-index: 1; /* Asegura que el contenedor esté por encima de las burbujas */
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            margin: 50px auto; /* Margen superior e inferior */
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo semitransparente */
+            max-height: calc(100vh - 100px); /* Altura máxima del contenedor */
+            overflow-y: auto; /* Activa el scroll vertical */
+            border: 2px solid #38A3A5; /* Borde para el contenedor */
+            width: 80%; /* Ancho del contenedor */
+            max-width: 800px; /* Ancho máximo del contenedor */
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.6);
+            opacity: 0.8;
+            animation: rise 10s infinite;
+            pointer-events: none;
+        }
+
+        .bubble.small {
+            width: 40px;
+            height: 40px;
+        }
+
+        .bubble.medium {
+            width: 60px;
+            height: 60px;
+        }
+
+        .bubble.large {
+            width: 80px;
+            height: 80px;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(100vh); }
+            100% { transform: translateY(-100px); }
+        }
+
+        h1, h2, h3 {
+            color: #22577A;
+        }
+
+        .mood {
+            font-size: 1.5em;
+            color: #38A3A5;
+            margin-top: 20px;
+        }
+
+        .alert {
+            border-radius: 10px;
+            background-color: #C7F9CC;
+            color: #22577A;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1 class="text-center">Resultados del examen para {{ test.name }}</h1>
+
+        {% if results %}
+            <ul class="list-group mt-4">
+                {% for result in results %}
+                    <li class="list-group-item">
+                        Estudiante: {{ result.student.name }} - Puntuación: {{ result.score }} / 100
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="alert alert-warning mt-4">No hay resultados disponibles para este examen.</div>
+        {% endif %}
+
+        <!-- Meme de gatitos -->
+        <div class="meme mt-5 text-center">
+            <h2>¡Relájate con este meme de gatitos!</h2>
+            <img id="catMeme" src="" alt="Meme de gatito" class="img-fluid" style="max-width: 300px;">
+        </div>
+
+        <!-- Mostrar el mood del día -->
+        <div class="mood text-center mt-4">
+            <h3>Mi mood de hoy: ¡Listo para aprender!</h3>
+        </div>
+    </div>
+
+    <script>
+        // Función para obtener un meme de gatito de la API de The Cat API
+        function getCatMeme() {
+            fetch('https://api.thecatapi.com/v1/images/search')
+                .then(response => response.json())
+                .then(data => {
+                    const catMemeUrl = data[0].url; // Obtener la URL de la imagen
+                    document.getElementById('catMeme').src = catMemeUrl; // Asignar la imagen al elemento img
+                })
+                .catch(error => {
+                    console.error('Error al obtener el meme de gatito:', error);
+                    document.getElementById('catMeme').alt = "No se pudo cargar el meme de gatito.";
+                });
+        }
+
+        // Llamar a la función al cargar la página
+        window.onload = getCatMeme;
+
+        // Generación de burbujas aleatorias
+        function createBubble() {
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble', 'small');
+            bubble.style.left = Math.random() * 100 + 'vw';
+            document.body.appendChild(bubble);
+
+            setTimeout(() => {
+                bubble.remove();
+            }, 8000);
+        }
+
+        setInterval(createBubble, 1000); // Generar burbuja cada 1 segundo
+    </script>
+</body>
+</html>
+{% endblock %}

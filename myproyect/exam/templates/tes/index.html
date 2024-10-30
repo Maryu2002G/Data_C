@@ -1,0 +1,223 @@
+{% extends "nav_pro.html" %}
+{% load static %}
+
+{% block titulo %} Lista de Pruebas {% endblock %}
+
+{% block contenido %}
+<div class="container-fluid" style="padding-top: 0; margin-top: 0;">
+    <!-- Bienvenida -->
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <div class="card shadow-sm text-center" style="background-color: #38A3A5; color: white;">
+                <div class="card-body">
+                    <h5 class="card-title">Bienvenido a la Lista de Pruebas</h5>
+                    <p class="card-text">Gestiona tus pruebas y visualiza estadísticas importantes.</p>
+                    <a href="{% url 'create_test' %}" class="btn btn-light btn-lg">
+                        <i class="fas fa-book-plus"></i> Agregar Prueba
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección de Gráficos y Pruebas -->
+    <div class="row">
+        <!-- Estadísticas de Pruebas -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header" style="background-color: #22577A; color: white;">
+                    <h5><i class="fas fa-chart-bar"></i> Estadísticas de Pruebas</h5>
+                </div>
+                <div class="card-body" style="height: 200px;">
+                    <canvas id="testStatsChart" height="180"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acordeón de Pruebas -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header" style="background-color: #80ED99; color: white;">
+                    <h5><i class="fas fa-book"></i> Pruebas</h5>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    <!-- Input para filtro -->
+                    <input type="text" id="testFilter" class="form-control mb-3" placeholder="Filtrar por nombre de prueba">
+
+                    <!-- Acordeón de pruebas -->
+                    <div class="accordion" id="testAccordion">
+                        {% for test in tests %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ test.id }}">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ test.id }}" aria-expanded="true" aria-controls="collapse{{ test.id }}">
+                                    {{ test.course.name }} - {{ test.get_typeExa_display }} ({{ test.testDate }})
+                                </button>
+                            </h2>
+                            <div id="collapse{{ test.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ test.id }}" data-bs-parent="#testAccordion">
+                                <div class="accordion-body">
+                                    <strong>Id:</strong> {{ test.id }}<br>
+                                    <strong>Número de Preguntas:</strong> {{ test.numQuestions }}<br>
+                                    <strong>Duración:</strong> {{ test.timeDuration }} minutos<br>
+                                    <strong>Intentos permitidos:</strong> {{ test.attempts }}<br>
+                                    <strong>Hora de Inicio:</strong> {{ test.tesTimI }}<br>
+                                    <strong>Hora de Fin:</strong> {{ test.tesTimF }}<br>
+                                    <strong>Módulo:</strong> {{ test.moduEx }}<br>
+                                    <div class="mt-3">
+                                        <a class="btn btn-info btn-sm" href="{% url 'update_test' test.id %}">
+                                            <i class="fas fa-edit"></i> Actualizar
+                                        </a>
+                                        <a class="btn btn-danger btn-sm" href="{% url 'delete_test' test.id %}">
+                                            <i class="fas fa-trash-alt"></i> Eliminar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Adicional (Resumen General) -->
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background-color: #57CC99; color: white;">
+                    <h5><i class="fas fa-book-open"></i> Total de Pruebas</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="display-4">{{ tests.count }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para el gráfico -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('testStatsChart').getContext('2d');
+    
+    // Contador de preguntas por tipo
+    var questionCounts = {};
+    {% for test in tests %}
+        var testLabel = '{{ test.course.name }} - {{ test.get_typeExa_display }}';
+        var questionCount = '{{ test.numQuestions }}';
+        if (questionCounts[testLabel]) {
+            questionCounts[testLabel] += questionCount; // suma si existe
+        } else {
+            questionCounts[testLabel] = questionCount; // inicializa si no existe
+        }
+    {% endfor %}
+
+    var labels = Object.keys(questionCounts);
+    var dataValues = Object.values(questionCounts);
+
+    var testStatsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Cantidad de Preguntas',
+                data: dataValues,
+                backgroundColor: [
+                    'rgba(225, 119, 122, 0.8)',
+                    'rgba(128, 237, 153, 0.8)',
+                    'rgba(56, 163, 165, 0.8)',
+                    'rgba(199, 249, 204, 0.8)',
+                    'rgba(255, 206, 86, 0.8)',  // Añadido un color extra para más barras
+                ],
+                borderColor: '#22577A',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Filtro por nombre de prueba
+    document.getElementById('testFilter').addEventListener('input', function () {
+        var filterValue = this.value.toLowerCase();
+        var accordions = document.querySelectorAll('.accordion-item');
+
+        accordions.forEach(function(item) {
+            var header = item.querySelector('.accordion-button');
+            var name = header.textContent.toLowerCase();
+
+            if (name.includes(filterValue)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+</script>
+
+<style>
+    body {
+        background-color: #f0f9e8;
+        font-family: 'Arial', sans-serif;
+        overflow-y: scroll;
+    }
+
+    /* Estilo del scroll */
+    ::-webkit-scrollbar {
+        width: 12px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #81c784;
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: #66bb6a;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #e8f5e9;
+        border-radius: 10px;
+    }
+
+    .card {
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .accordion-button {
+        background-color: #ffffff; /* Fondo blanco para el botón */
+        color: #333; /* Color del texto */
+        border: 1px solid #ced4da; /* Bordes sutiles */
+        border-radius: 5px;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: #e7f1f7; /* Fondo para el botón expandido */
+        color: #007bff; /* Color del texto para el botón expandido */
+    }
+
+    .accordion-body {
+        font-size: 15px;
+    }
+
+    .accordion-item {
+        border: none;
+        background-color: #ffffff; /* Fondo blanco para el acordeón */
+        margin-bottom: 10px; /* Espacio entre acordeones */
+        border-radius: 5px; /* Esquinas redondeadas */
+    }
+</style>
+{% endblock %}

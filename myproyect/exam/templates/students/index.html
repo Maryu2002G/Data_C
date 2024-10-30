@@ -1,0 +1,49 @@
+{% extends "nav.html" %}
+
+{% block titulo %} Lista de Estudiantes {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <a name="" id="" class="btn btn-primary" href="{% url 'create_student' %}" role="button">Agregar nuevo estudiante</a>
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Estudiantes</h4>
+        <div class="table-responsive">
+            <table class="table table-primary">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre del Estudiante</th>
+                        <th scope="col">Curso</th>
+                        <th scope="col">Carrera</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td scope="row">{{ student.id }}</td>
+                        <td>{{ student.user.namUsu }} {{ student.user.lasUsu }}</td>  <!-- Asegúrate de que se acceda al usuario correctamente -->
+                        <td>{{ student.course.nomCourse }}</td>  <!-- Acceso al nombre del curso -->
+                        <td>{{ student.career.nameCareer }}</td>  <!-- Acceso al nombre de la carrera -->
+                        <td>
+                            <a class="btn btn-info" href="{% url 'update_student' student.id %}" role="button">Actualizar</a>
+                            |
+                            <a class="btn btn-danger" href="{% url 'delete_student' student.id %}" role="button">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No hay estudiantes disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
+    </div>
+</div>
+{% endblock %}

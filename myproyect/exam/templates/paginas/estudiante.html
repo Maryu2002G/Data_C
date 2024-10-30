@@ -1,0 +1,21 @@
+{% extends "nav_est.html" %}
+{% block titulo %} Inicio {% endblock %}
+{% block contenido %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h1 class="text-center">Perfil del Estudiante</h1>
+        </div>
+        <div class="card-body">
+            <ul class="list-group">
+                <li class="list-group-item"><strong>Nombre:</strong> {{ first_name }} {{ last_name }}</li>
+                <li class="list-group-item"><strong>Correo:</strong> {{ email }}</li>
+                <li class="list-group-item"><strong>Carrera:</strong> {{ carrera }}</li>
+                <li class="list-group-item"><strong>Curso:</strong> {{ curso }}</li>
+                <!-- Añade más información que necesites mostrar -->
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

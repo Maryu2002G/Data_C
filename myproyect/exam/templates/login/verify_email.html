@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" dir="ltr">
+  <head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar Correo Electrónico</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+  </head>
+  <body>
+    <h2>Simulador SaberPro</h2>
+    <h2>Universidad de Cundinamarca</h2>
+    <div class="center">
+      <h1>Verificar Correo</h1>
+
+      <!-- Mostrar mensajes de error o éxito -->
+      {% if messages %}
+        {% for message in messages %}
+          {% if message.tags == 'error' %}
+            <center><h4 style="color: firebrick;">{{message}}</h4></center>
+          {% else %}
+            <center><h4 style="color: rgb(51, 177, 103);">{{message}}</h4></center>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      <!-- Formulario de verificación de código -->
+      <form method="POST">
+        {% csrf_token %}
+        <div class="txt_field">
+          <input type="text" required name="verification_code">
+          <span></span>
+          <label>Código de Verificación</label>
+        </div>
+
+        <input type="submit" value="Verificar">
+      </form>
+    </div>
+  </body>
+</html>

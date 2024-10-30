@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if formulario.instance.id %}Actualizar{% else %}Crear{% endif %} Prueba</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/material_green.css">
+
+    <style>
+        body {
+            background-color: #eaf7f2;
+            padding: 20px;
+        }
+        .form-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+        }
+        .form-label {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .form-control {
+            border-radius: 5px;
+        }
+        .help-text {
+            font-size: 0.9em;
+            margin-top: 0.25rem;
+        }
+        .btn-primary {
+            background-color: #4CAF50;
+            border: none;
+            margin-right: 10px;
+        }
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        .btn-danger {
+            background-color: #ff6f61;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #e65c50;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2 class="text-center" style="color: #4CAF50;">{% if formulario.instance.id %}Actualizar{% else %}Crear{% endif %} Prueba</h2>
+    <form enctype="multipart/form-data" method="POST" class="needs-validation" novalidate>
+        {% csrf_token %}
+
+        <!-- Campo de selección para Profesor Encargado (userProfesor) -->
+        <div class="mb-3">
+            <label for="{{ formulario.userProfesor.auto_id }}" class="form-label">{{ formulario.userProfesor.label }}</label>
+            <select class="form-select {% if formulario.userProfesor.errors %} is-invalid {% endif %}" name="{{ formulario.userProfesor.name }}" id="{{ formulario.userProfesor.auto_id }}" required>
+                {% for option in formulario.userProfesor.field.choices %}
+                    <option value="{{ option.0 }}" {% if option.0 == formulario.userProfesor.value %} selected {% endif %}>
+                        {{ option.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+            <div class="col-12 help-text text-danger">{{ formulario.userProfesor.errors }}</div>
+        </div>
+        
+        <!-- Campo de selección para Curso (course) -->
+        <div class="mb-3">
+            <label for="{{ formulario.course.auto_id }}" class="form-label">{{ formulario.course.label }}</label>
+            <select class="form-select {% if formulario.course.errors %} is-invalid {% endif %}" name="{{ formulario.course.name }}" id="{{ formulario.course.auto_id }}" required>
+                
+                {% for option in formulario.course.field.choices %}
+                    <option value="{{ option.0 }}" {% if option.0 == formulario.course.value %} selected {% endif %}>
+                        {{ option.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+            <div class="col-12 help-text text-danger">{{ formulario.course.errors }}</div>
+        </div>
+
+        <!-- Campo de Fecha de la Prueba -->
+        <div class="mb-3">
+            <label for="id_testDate" class="form-label">Fecha de la Prueba</label>
+            <div class="input-group">
+                <input type="text" name="testDate" id="id_testDate" class="form-control flatpickr {% if formulario.testDate.errors %} is-invalid {% endif %}" placeholder="Selecciona una fecha" value="{{ formulario.testDate.value|date:'Y-m-d'|default_if_none:'' }}" required />
+                <span class="input-group-append">
+                    <span class="input-group-text">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar" viewBox="0 0 16 16">
+                            <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                        </svg>
+                    </span>
+                </span>
+            </div>
+            <div class="col-12 help-text text-danger">{{ formulario.testDate.errors }}</div>
+        </div>
+
+        <!-- Campo de hora de inicio -->
+        <div class="mb-3">
+            <label for="id_tesTimI" class="form-label">Hora de la Prueba Inicio</label>
+            <input type="time" class="form-control {% if formulario.tesTimI.errors %} is-invalid {% endif %}" name="tesTimI" id="id_tesTimI" value="{{ formulario.tesTimI.value|time:'H:i'|default_if_none:'' }}" required />
+            <div class="col-12 help-text text-danger">{{ formulario.tesTimI.errors }}</div>
+        </div>
+
+        <!-- Campo de hora de fin -->
+        <div class="mb-3">
+            <label for="id_tesTimF" class="form-label">Hora de la Prueba Fin</label>
+            <input type="time" class="form-control {% if formulario.tesTimF.errors %} is-invalid {% endif %}" name="tesTimF" id="id_tesTimF" value="{{ formulario.tesTimF.value|time:'H:i'|default_if_none:'' }}" required />
+            <div class="col-12 help-text text-danger">{{ formulario.tesTimF.errors }}</div>
+        </div>
+
+        <!-- Número de preguntas -->
+        <div class="mb-3">
+            <label for="id_numQuestions" class="form-label">Número de Preguntas</label>
+            <input type="number" class="form-control {% if formulario.numQuestions.errors %} is-invalid {% endif %}" name="numQuestions" id="id_numQuestions" placeholder="Número de preguntas" value="{{ formulario.numQuestions.value|default_if_none:'' }}" required />
+            <div class="col-12 help-text text-danger">{{ formulario.numQuestions.errors }}</div>
+        </div>
+
+        <!-- Duración de la prueba (campo oculto) -->
+        <div class="mb-3">
+            <input type="hidden" class="form-control {% if formulario.timeDuration.errors %} is-invalid {% endif %}" name="timeDuration" id="id_timeDuration" value="{{ formulario.timeDuration.value|default_if_none:'' }}" required />
+          
+        </div>
+
+        <!-- Número de intentos -->
+        <div class="mb-3">
+            <label for="id_Attempts" class="form-label">Número de Intentos</label>
+            <input type="number" class="form-control {% if formulario.Attempts.errors %} is-invalid {% endif %}" name="Attempts" id="id_Attempts" value="{{ formulario.Attempts.value|default_if_none:'1' }}" required />
+            <div class="col-12 help-text text-danger">{{ formulario.Attempts.errors }}</div>
+        </div>
+
+        <!-- Tipo de prueba -->
+        <div class="mb-3">
+            <label for="id_typeExa" class="form-label">Tipo de Prueba</label>
+            <select class="form-select {% if formulario.typeExa.errors %} is-invalid {% endif %}" name="typeExa" id="id_typeExa" required>
+                {% for value, display in formulario.fields.typeExa.choices %}
+                    <option value="{{ value }}" {% if value == formulario.typeExa.value %} selected {% endif %}>
+                        {{ display }}
+                    </option>
+                {% endfor %}
+            </select>
+            <div class="col-12 help-text text-danger">{{ formulario.typeExa.errors }}</div>
+        </div>
+
+        <!--check list-->
+        <div class="mb-3">
+            <label class="form-label">Selecciona Módulos</label><br>
+            <div>
+                <input type="checkbox" class="modulo-checkbox" value="INGLÉS" id="modulo1" onchange="updateModuEx()"> INGLÉS
+            </div>
+            <div>
+                <input type="checkbox" class="modulo-checkbox" value="LECTURA CRÍTICA" id="modulo2" onchange="updateModuEx()"> LECTURA CRÍTICA
+            </div>
+            <div>
+                <input type="checkbox" class="modulo-checkbox" value="COMUNICACIÓN ESCRITA" id="modulo3" onchange="updateModuEx()"> COMUNICACIÓN ESCRITA
+            </div>
+            <div>
+                <input type="checkbox" class="modulo-checkbox" value="RAZONAMIENTO CUANTITATIVO" id="modulo4" onchange="updateModuEx()"> RAZONAMIENTO CUANTITATIVO
+            </div>
+            <div>
+                <input type="checkbox" class="modulo-checkbox" value="COMPETENCIAS CIUDADANAS" id="modulo5" onchange="updateModuEx()"> COMPETENCIAS CIUDADANAS
+            </div>
+            <div>
+                <input type="checkbox" class="modulo-checkbox" value="ANÁLISIS ECONÓMICO" id="modulo6" onchange="updateModuEx()"> ANÁLISIS ECONÓMICO
+            </div>
+            <div>
+                <input type="checkbox" class="modulo-checkbox" value="DISEÑO DE SOFTWARE" id="modulo7" onchange="updateModuEx()"> DISEÑO DE SOFTWARE
+            </div>
+            
+        </div>
+        <!----->
+ 
+
+        <div class="mb-3">
+            <label for="id_moduEx" class="form-label">Modulo prueba</label>
+            <input type="text" class="form-control {% if formulario.moduEx.errors %} is-invalid {% endif %}" name="moduEx" id="id_moduEx" value="{{ formulario.moduEx.value|default_if_none:'' }}" required />
+            <div class="col-12 help-text text-danger">{{ formulario.moduEx.errors }}</div>
+        </div>
+        <div class="button-container">
+            <button type="submit" class="btn btn-primary">
+                {% if formulario.instance.id %}Actualizar{% else %}Crear{% endif %} 
+            </button>
+            <a href="{% url 'list_tests' %}" class="btn btn-danger">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<!-- jQuery and Bootstrap Bundle -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    // Initialize flatpickr
+    flatpickr("#id_testDate", {
+        dateFormat: "Y-m-d", // Formato de fecha
+        minDate: "today", // Establecer la fecha mínima como hoy
+    });
+
+    // Validación del formulario
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+
+
+
+
+<script>
+    function updateModuEx() {
+        const checkboxes = document.querySelectorAll('.modulo-checkbox');
+        const moduExInput = document.getElementById('id_moduEx');
+        const selectedModules = [];
+
+        checkboxes.forEach((checkbox) => {
+            if (checkbox.checked) {
+                selectedModules.push(checkbox.value);
+            }
+        });
+
+        moduExInput.value = selectedModules.join(', ');
+    }
+</script>

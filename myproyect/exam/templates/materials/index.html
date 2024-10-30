@@ -1,0 +1,45 @@
+{% extends "nav.html" %}
+{% block titulo %} Lista de Materiales {% endblock %}
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+       <a class="btn btn-primary" href="{% url 'create_material' %}" role="button">Agregar nuevo material</a>
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Materiales</h4>
+        <div class="table-responsive">
+            <table class="table table-primary">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Tipo</th>
+                        <th scope="col">Contenido</th>
+                        <th scope="col">Imagen</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for material in materials %}
+                    <tr>
+                        <td scope="row">{{ material.id }}</td>
+                        <td>{{ material.get_type_display }}</td>
+                        <td>{{ material.content }}</td>
+                        <td>
+                            <img src="{{ material.image.url }}" alt="Imagen de {{ material.content }}" style="max-width: 100px; max-height: 100px;">
+                        </td>
+                        <td> 
+                            <a class="btn btn-info" href="{% url 'update_material' material.id %}" role="button">Actualizar</a>
+                            |  
+                            <a class="btn btn-danger" href="{% url 'delete_material' material.id %}" role="button">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
+    </div>
+</div>
+{% endblock %}

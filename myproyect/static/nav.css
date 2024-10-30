@@ -1,0 +1,185 @@
+body {
+  background-color: #eafaf1;
+  font-family: 'Nunito', sans-serif;
+  overflow-x: hidden; /* Evitar scroll horizontal */
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: #FFFFFF;
+  height: 100vh;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 250px;
+  transition: transform 0.3s ease;
+  z-index: 1000; /* Asegurar que esté encima */
+}
+
+.sidebar.show {
+  transform: translateX(0); /* Mostrar al hacer clic */
+}
+
+.sidebar h2 {
+  color: #22577A;
+  font-weight: bold;
+}
+
+.sidebar ul {
+  padding: 0;
+  list-style: none;
+}
+
+.sidebar ul li a {
+  display: block;
+  padding: 10px;
+  color: #22577A;
+  text-decoration: none;
+  font-weight: 500;
+  margin: 10px 0;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  background-color: #80ED99;
+  border-radius: 8px;
+  color: #FFFFFF;
+}
+
+.upgrade-btn {
+  background-color: #57CC99; /* Color de fondo del botón */
+  border: none;
+  padding: 10px;
+  width: 100%;
+  color: #FFFFFF;
+  font-weight: bold;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+/* Contenido principal */
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+  transition: margin-left 0.3s ease;
+}
+
+.banner {
+  background-color: #C7F9CC;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  color: #22577A;
+}
+
+.banner h1 {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.section-title {
+  margin-top: 30px;
+  font-size: 24px;
+  color: #22577A;
+  font-weight: 600;
+}
+
+.card {
+  background-color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
+}
+
+.card img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: #22577A;
+  font-size: 14px;
+}
+
+.stats {
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stats h4 {
+  color: #22577A;
+  font-weight: bold;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0; /* Ajustar margen */
+  }
+
+  .toggle-sidebar-btn {
+    display: block; /* Mostrar botón en pantallas pequeñas */
+  }
+
+  .sidebar {
+    transform: translateX(-100%); /* Ocultar inicialmente en pantallas pequeñas */
+  }
+}
+
+@media (min-width: 769px) {
+  .toggle-sidebar-btn {
+    display: none; /* Ocultar botón en pantallas grandes */
+  }
+}
+
+.toggle-sidebar-btn {
+  padding: 10px 15px; /* Agregar padding al botón */
+  margin: 10px; /* Margen alrededor del botón */
+  background-color: #57CC99; /* Color del botón */
+  color: #FFFFFF; /* Color del texto */
+  border: none; /* Sin borde */
+  border-radius: 8px; /* Bordes redondeados */
+}
+.pixel-btn {
+background-color: #c03e56; /* Color de fondo */
+color: white; /* Color del texto */
+border: none; /* Sin borde */
+padding: 10px 20px; /* Espaciado interno */
+font-size: 16px; /* Tamaño de la fuente */
+cursor: pointer; /* Cambiar cursor */
+position: relative; /* Para el efecto de pseudo-elemento */
+overflow: hidden; /* Para ocultar el efecto de partículas que se escapan */
+transition: background-color 0.3s ease; /* Transición suave para el fondo */
+}
+
+.pixel-btn:hover {
+background-color: #0056b3; /* Cambia el color al pasar el ratón */
+}
+
+@keyframes explode {
+0% {
+transform: scale(1); /* Sin escalado */
+opacity: 1; /* Totalmente visible */
+}
+50% {
+transform: scale(1.2); /* Aumentar tamaño al 120% */
+opacity: 0.8; /* Ligeramente transparente */
+}
+100% {
+transform: scale(0); /* Reducir a 0% */
+opacity: 0; /* Invisible */
+}
+}
+
+.pixel-btn:active {
+animation: explode 0.3s forwards; /* Aplicar la animación de explosión al hacer clic */
+}

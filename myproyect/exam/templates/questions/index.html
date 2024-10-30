@@ -1,0 +1,51 @@
+{% extends "nav.html" %}
+
+{% block titulo %} Lista de Preguntas {% endblock %}
+
+{% block contenido %}
+<div class="card">
+    <div class="card-header">
+        <a class="btn btn-primary" href="{% url 'create_question' %}" role="button">Agregar nueva pregunta</a>
+    </div>
+    <div class="card-body">
+        <h4 class="card-title">Preguntas</h4>
+        <div class="table-responsive">
+            <table class="table table-primary">
+                <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Asignatura</th>
+                        <th scope="col">Pregunta</th>
+                        <th scope="col">Opciones</th>
+                        <th scope="col">Opción Correcta</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in questions %}
+                    <tr>
+                        <td scope="row">{{ question.id }}</td>
+                        <td>{{ question.idAsignature }}</td> <!-- Mostrar el nombre de la asignatura -->
+                        <td>{{ question.question }}</td>
+                        <td>{{ question.options }}</td>
+                        <td>{{ question.correctOption }}</td>
+                        <td>
+                            <a class="btn btn-info" href="{% url 'update_question' question.id %}" role="button">Actualizar</a>
+                            |  
+                            <a class="btn btn-danger" href="{% url 'delete_question' question.id %}" role="button">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No hay preguntas disponibles.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer text-muted">
+        <!-- Aquí puedes agregar cualquier contenido adicional del pie de la tarjeta -->
+    </div>
+</div>
+{% endblock %}
